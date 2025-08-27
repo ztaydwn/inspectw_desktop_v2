@@ -5,21 +5,15 @@ from pptx.dml.color import RGBColor
 from PIL import Image, ImageOps
 import io, math
 from typing import Dict
-from ..core.processing import Grupo
+from ..core.processing import Grupo, Foto
 
 def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, bytes],
                                  output_pptx_path: str, max_px: int = 1600) -> None:
-    """
-    Crea un archivo PPTX en formato de informe A4 vertical (sección fotos 4x3 + área inferior
-    para 'UBICACIÓN Y DETALLE' y 'RECOMENDACIONES').
-    """
     prs = Presentation()
-    # Definir tamaño A4 vertical
     prs.slide_width = Inches(8.27)
     prs.slide_height = Inches(11.69)
     blank_layout = prs.slide_layouts[6]
 
-    # Layout: 4x3 fotos
     cols, rows = 4, 3
     margin_x = 0.4
     margin_y_top = 1.2
@@ -42,7 +36,6 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
         for page in range(pages):
             slide = prs.slides.add_slide(blank_layout)
 
-            # Título del grupo
             title_box = slide.shapes.add_textbox(
                 Inches(margin_x), Inches(0.3),
                 Inches(slide_w_in - 2 * margin_x), Inches(0.5)
@@ -52,7 +45,6 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
             if p_title.runs:
                 p_title.runs[0].font.size = Pt(20)
 
-            # Etiqueta "FOTOGRAFÍAS"
             label_y = margin_y_top - 0.3
             label_box = slide.shapes.add_textbox(
                 Inches(margin_x), Inches(label_y),
@@ -65,7 +57,6 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
                 run_label.font.bold = True
                 run_label.font.size = Pt(12)
 
-            # Procesar fotos para esta página
             chunk = grupo.fotos[page * per_slide:(page + 1) * per_slide]
             for idx, foto in enumerate(chunk):
                 r = idx // cols
@@ -73,9 +64,8 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
                 x = margin_x + c * (cell_w + spacing_x)
                 y = margin_y_top + r * (cell_h + spacing_y)
 
-                # Obtener y procesar imagen del ZIP
                 img_path = f"{foto.carpeta}/{foto.filename}"
-                img_data = archivos.get(img_path) or archivos.get(img_path.replace('/', '\\'))
+                img_data = archivos.get(img_path) or archivos.get(img_path.replace('/','\\'))
 
                 if img_data:
                     img = Image.open(io.BytesIO(img_data))
@@ -86,13 +76,11 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
                     buffer = io.BytesIO()
                     img.save(buffer, format="JPEG", quality=80, optimize=True)
                     buffer.seek(0)
-
                     slide.shapes.add_picture(
                         buffer, Inches(x), Inches(y),
                         width=Inches(cell_w), height=Inches(cell_h)
                     )
 
-            # Área inferior para descripciones y recomendaciones
             enum_y = slide_h_in - enumerated_h - margin_y_bottom
             enum_x = margin_x
             enum_w = slide_w_in - 2 * margin_x
@@ -101,7 +89,6 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
             details_w = enum_w * 0.7
             recom_w = enum_w - details_w
 
-            # Cabecera detalles
             header_det = slide.shapes.add_shape(
                 MSO_SHAPE.RECTANGLE,
                 Inches(enum_x), Inches(enum_y),
@@ -115,7 +102,6 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
             if txt_hd.paragraphs[0].runs:
                 txt_hd.paragraphs[0].runs[0].font.bold = True
 
-            # Cabecera recomendaciones
             header_rec = slide.shapes.add_shape(
                 MSO_SHAPE.RECTANGLE,
                 Inches(enum_x + details_w), Inches(enum_y),
@@ -129,7 +115,6 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
             if txt_hr.paragraphs[0].runs:
                 txt_hr.paragraphs[0].runs[0].font.bold = True
 
-            # Cuerpo detalles
             body_det = slide.shapes.add_shape(
                 MSO_SHAPE.RECTANGLE,
                 Inches(enum_x), Inches(enum_y + header_h),
@@ -141,11 +126,19 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
             tf_det = body_det.text_frame
             tf_det.clear()
 
-            # Enumerar descripciones
+            # Enumerar descripciones aplicando la nueva lógica de recorte
             for idx, foto in enumerate(chunk, start=1):
-                desc_text = f"{idx}. {foto.description_base}"
-                if foto.detalle:
-                    desc_text += f" + {foto.detalle}"
+                full_detail = foto.specific_detail
+                detail_to_show = ""
+                # Si hay un '+', tomar solo el texto después de él
+                if '+' in full_detail:
+                    # Usamos split con maxsplit=1 por si hay más de un '+'
+                    detail_to_show = full_detail.split('+', 1)[1].strip()
+                else:
+                    # Si no hay '+', mostramos el texto original
+                    detail_to_show = full_detail
+                
+                desc_text = f"{idx}. {detail_to_show}"
                 p = tf_det.add_paragraph()
                 p.text = desc_text
                 if p.runs:
@@ -153,7 +146,6 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
                     run.font.size = Pt(10)
                     run.font.color.rgb = RGBColor(0, 0, 0)
 
-            # Cuerpo recomendaciones (verde claro)
             body_rec = slide.shapes.add_shape(
                 MSO_SHAPE.RECTANGLE,
                 Inches(enum_x + details_w), Inches(enum_y + header_h),

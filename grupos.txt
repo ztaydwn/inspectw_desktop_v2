@@ -1,0 +1,93 @@
+ENUMERACION	GRUPOS
+1.1.1	Los medios de evacuación (pasadizos, escaleras, accesos y salidas) del establecimiento presentan un ancho mínimo de 1.20 m y/o que permitan la evacuación de las personas de manera segura. RNE A.010.
+1.1.2	Los medios de evacuación (pasadizos, escaleras, accesos y salidas) se encuentran libres de obstáculos. RNE A.130 Art 13; A.010 Art  25
+1.1.3	El establecimiento cuenta con señalización de seguridad (direccionales de salida, salida, zona segura en caso de sismo, riesgo eléctrico, extintores, otros). RNE A.130, Art. 39; NTP 399.010 -1
+1.1.4	Cuenta con luces de emergencia operativas. RNE- A-130 Art. 40
+1.1.5	Las puertas que se utilizan como medios de evacuación abren en el sentido del flujo de los evacuantes o permanecen abiertas en horario de atención, sin obstruir la libre circulación y evacuación. RNE A130 Art. 5 y 6
+1.1.6	En caso de contar con un ambiente con aforo mayor a 100 personas, en cualquier caso, la puerta de salida cuenta con barra antipánico. RNE A130 Art. 8
+1.1.7	No cuenta con material combustible o inflamable debajo de las escaleras que sirvan como medios de evacuación (cartones, muebles, plásticos otros similares). RNE A.010 Art. 26, b16
+1.1.8	Las escaleras cumplen con las caraceristicas en numero y tipo (incluye excepciones de la norma señaladas en el RNE A010 art 28) pasos, dimensiones, contrapasos, descansos y barandas correspondientes al tipo de la edificación y su altura. RNE A.010 hasta la  A.110; A.140
+1.1.9	Las escaleras que comunican todos los niveles de la edificacion, son continuas desde el primer piso hasta el ultimo en sentido vertical u horizontal estan intercomunicadas entre si, por pasadizos de circulacion libre. Barreras de contencion y direccionamiento en piso de evacuacion en escaleras con continuidad a niveles inferiores de la salida de evacuacion. Las escaleras a los sotanos podran ser independientes; RNE A.010: 26 b.4
+1.2.1	El gabinete es de material metálico o de resina termoplástica y/o se encuentran en buen estado de conservación. CNE-U 020.024, 020.026 b
+1.2.2	Cuenta con interruptores termomagnéticos y corresponden a la capacidad de corriente de los conductores eléctricos que protege. No utiliza llaves tipo cuchilla. CNE-U 080.010, 080.100, 080.400
+1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético. El tablero tiene un interruptor general en su interior o adyacente al mismo. CNE-U 080.010, 080.100, 080.400
+1.2.4	No utiliza conductores flexibles (tipo mellizo) en instalaciones permanentes de alumbrado y/o tomacorriente. CNE-U 030.010.3
+1.2.5	Los circuitos de tomacorrientes no están sobrecargados con extensiones o adaptadores. CNE-U 080.100 a
+1.2.6	"En locales de pública concurrencia construidos con posterioridad a abril del 2008 tales    como: cines, teatros, auditorios, estadios, ferias, parques de atracciones,  salas de fiesta, discotecas, salas de juego de azar y similares, templos, museos, salas de conferencias, establecimientos comerciales, centros comerciales, mercados, hoteles   y similares, hospitales, clínicas, bibliotecas, colegios, universidades y otros, las instalaciones eléctricas de cables y conductores eléctricos deben ser  del tipo no propagador del incendio, con baja emisión de humos, libre de halógenos y ácidos corrosivos.
+CNE-U 010.010.4, 020.126 (RM No. 175-2008-MEM/DM)"
+1.2.7	La alimentación eléctrica a la bomba de agua contra incendios es independiente, no controlada por el interruptor general del edificio e interconectada al grupo electrógeno de emergencia del edificio, en caso de tenerlo. RNE IS 010.4.2. j
+1.3.1	Cuenta con extintores operativos y en cantidad adecuada de acuerdo al riesgo existente en el establecimiento. NTP 350.043:2011
+1.3.2	Los extintores cuentan con tarjeta de control y mantenimiento actualizada, se encuentran operativos, a una altura no mayor de 1.50m, numerados, ubicados en los lugares accesibles. Los extintores tienen constancia de operatividad y mantenimiento. RNE A 130 ART 163, 165; NTP 350.043-1s
+1.3.3	Los extintores ubicados a la intemperie están colocados dentro de gabinetes o cobertores. RNE A 130 ART 163, 165; NTP 350.043-1
+1.3.4	Cuenta con plan de seguridad para hacer frente a los riesgos de incendio y otros vinculados a la actividad, para establecimientos de dos a más pisos. DS N° 002-2018 PCM
+1.3.5	Las mangueras del tipo flexible de los cilindros (balones) de Gas Licuado de Petróleo (GLP) tipo 10 (de capacidad hasta 25kg) se encuentran en buen estado de conservación (sin rajaduras, libres de grasa, limpias, con sujeción firme con abrazaderas. DS N° 027-94 EM.
+1.3.6	Las instalaciones de GLP que utilizan cilindros tipo 45 (de capacidad mayor a 25Kg), tienen tuberías de cobre o fierro galvanizado. DS N° 027-94 EM.
+1.3.7	Los cilindros de GLP están alejados de interruptores a una distancia mayor a 0.30m, y mayor a 0.50m de tomacorrientes, se ubican en lugares ventilados y alejados de cualquier fuente de calor. DS N° 027-94 EM.
+1.3.8	Los cilindros de GLP no se encuentran ubicados en nivel de semisótano, sótanos, cajas de escalera, pasillos, pasadizos de uso común y vía pública. DS N° 027-94 EM.
+1.3.9	En escaleras presurizadas, la alimentación de energía para los motores del ventilador  debe contar con dos fuentes independientes, de transferencia automática. RNE A 130 Art. 34
+1.3.10	El sistema de presurización se encuentra en buen estado de conservación y operativo. CNE-U 010.010-3
+1.3.11	Cuenta con un sistema de proteccion contraincendios a base de agua en función al tipo de edificación, área, altura, y clasificacion del riesgo. RNE A-130 Art.100 y 102 (DISEÑO) NFPA 14.  VIVIENDA -art  66, 67, 69, y 70  art 71 y  75  art 81 art 89  art  99 art.100, 102, 117, y  152)   art 172, 179, y 181, 185 ,  186, 187, 188, y  189.art 197 , 201 ,  205 , 208 , 213 y 214  - RNE A.100 art 25 y 26. INDUSTRIAS - DS 42F, CAPITULO II, Seccion 2da Art 145  
+1.3.12	"Para todas las edificaciones se debe cumplir con las distancias máximas de recorrido hasta una zona segura exterior o hasta una escalera del tipo de evacuación. Los rociadores son de uso obligatorio en las edificaciones donde sea requerido de acuerdo a la norma en particular de cada tipo de edificación. 
+NFPA 13. RNC S-224-1,2, RNE A.130 Art 102.A; Art 162 A.130 Art 161.COMERCIO RNE A.130 Art 89, y 96 OFICINAS - RNE A.130 Art 99; ALMACENES - RNE A.130 ART 171, ART 181 (ALT MENOR A 3.7), 185 (ALT ENTRE 3.70 Y 7.6),  186 (ALT MAYOR A 7.6), Art 188, 189, y  192; INDUSTRIAS USAR DS 42F art 114, 157, 158,           "
+1.3.13	Las puertas de la escalera de evacuación cumplen con las caracteristicas de resistencia al fuego y cuentan con accesorios (cierrapuertas, barra antipanico) segun corresponda, en base al riesgo, tipo, uso y altura de la edificacion. RNE A.010 Art. 26 b), A.130:art.,7-8, 10-11, A 010 Art. 26.b,A.060  art. 13.)
+1.4.1	Cuenta con un sistema de detección y alarma de incendios centralizado operativo. Se encuentran exceptuados. RNE A.130 Art 89.
+1.4.2	Cuenta con extintores operativos en cantidad adecuada de acetato de potasio para ambientes que cuentan con freidora, producen humos y vapores de grasa. NTP 350.043:2011; RNE A-130 Art. 165
+1.9.1	"Almacenaje no techado de productos peligrosos.Las mercancias deben ser almacenadas en funcion al tipo de riesgo, no juntando o almacenando productos que reaccionan entre si y/o que no son compatibles, de acuerdo a las guias NFPA 49 491, RNE- A-130- Art. 175, Art 176, Art 177, Art 178.NFPA 704.D.S.042 F.- Art. 1020
+Almacenaje techado de productos peligrosos.Los almacenes mayores a 250 m2 destinados a carga y/o mercaderias y/o materiales peligrosos, deberan ser diseñados y protegidos segun NFPA 5000.Basados en el grado de peligrosidad y cantidad de mercancia almacenada.
+RNE A.130 Art 188"
+2.1	La cimentación o parte de ella no se encuentra expuesta, inestable en peligro de colapso como consecuencia de filtraciones de agua, erosión, socavamiento, otros. RNE E.050.
+2.2.1	Las estructuras de concreto no presentan i) fisuras, grietas, rajaduras, deflexiones, pandeos, muros inclinados, varillas de acero expuestas a la intemperie sin recubrimiento en: columnas, vigas, losas de techos, etc., ii) deterioro por humedad producido por: filtraciones, de tanques y cisternas de almacenamiento de agua, de líquidos, tuberías rotas, lluvias, etc., otras fallas estructurales. RNE E.060
+2.2.2	Las estructuras de la edificación (losas y vigas de techos, azoteas o losas en niveles intermedios), no presentan fisuras, grietas, rajaduras, pandeos, deflexiones, humedad, otros; como consecuencia de sobrecargas existentes producidas por: tanque elevado, equipos, antenas, panel publicitario, otros. RNE E.060, E.020
+2.2.3	Los muros de contención en sótanos, en cercos y otros, no presentan fisuras, grietas, rajaduras, deflexiones, pandeos, inclinaciones, varillas de acero expuestas a la intemperie sin recubrimiento, deterioro por humedad producido por filtraciones de tanques y cisternas de almacenamiento de agua, de líquidos, tuberías rotas, lluvias, etc. y otros. RNE E.060
+2.3.1	La edificación de albañilería cuenta con elementos de concreto armado de confinamiento, amarre y/o arriostramiento tales como: cimientos, columnas, vigas, losas. RNE E.070.
+2.3.2	Los muros de albañilería no presentan daños: humedad, rajaduras, grietas, inclinaciones, otros. RNE E.070
+2.4.1	Los muros de adobe no presentan fallas ni daños ocasionados por el deterioro y/o humedad (fisuras, grietas, inclinaciones). No es utilizado como muro de contención de suelos, materiales u otros que hagan que pierda su estabilidad. Sobre los muros de adobe no existen construcciones de albañilería o concreto. Los muros de adobe están protegidos de la lluvia en zonas lluviosas. RNE E.080, E.020
+2.5.1	Las estructuras de madera, bambú, no presentan rajaduras, deflexiones, pandeos, deterioro por apolillamiento, humedad, otros. RNE E.010
+2.5.2	Las estructuras (postes, columnas, vigas, viguetas, techos entablados, tijerales o cerchas, etc.), no presentan rajaduras, pandeos, deflexiones, como consecuencia de sobrecargas existentes producidas por: tanque elevado, equipos, antenas, panel publicitario, o como consecuencia de otros usos que impliquen cargas mayores a la que puede soportar la estructura. RNE E.010, E.020
+2.5.3	La estructura de madera se encuentra alejada o aislada de fuentes de calor que podrían dañarla, o en caso de encontrarse próxima a fuentes de calor, se encuentra protegida con material incombustible y/o tratada con sustancias retardantes o ignifugas. RNE E.010 Numeral 11.3.8.
+2.6.1	Las edificaciones o techos de estructura de acero no presentan deformaciones o pandeos excesivos y visibles que perjudiquen su estabilidad. Los apoyos, uniones y anclajes son seguros (tienen pernos y soldaduras en buen estado de conservación). RNE E.090.
+2.6.2	No presentan deterioro por oxido y/o corrosión y se encuentra protegida contra este. RNE E.090.
+3.1.1	El tablero eléctrico de material metálico está conectado a tierra. CNE-U 060.402.1 h
+3.1.2	El tablero cuenta con placa de protección (mandil). CNE-U 020.202.1
+3.1.3	Las aberturas no usadas en los tableros eléctricos (espacios de reserva) se encuentran cerradas con tapas. CNE-U 070.3026
+3.1.4	Todos los circuitos eléctricos tienen protección de interruptores diferenciales. CNE-U 020.132 (RM No.175-2008-MEM)
+3.1.5	Los componentes del pozo de puesta a tierra presentan óxido, deterioro del cable de conexión, conector y varilla en mal estado de conservacion. CNE-U 010.010.3
+3.1.6	Si cuenta con equipos y/o artefactos eléctricos, (hornos microondas, congeladoras, refrigeradoras, lavadoras, calentadores y similares) los enchufes tienen espiga de puesta a tierra y los tomacorrientes cuentan con conexión al sistema de puesta a tierra. CNE-U 060 512.c
+3.1.7	Las carcasas de los motores eléctricos estacionarios, grupos electrógenos y equipos de aire acondicionado están conectados al sistema de puesta a tierra. CNE-U 060.400, 060.402
+3.1.8	Las estructuras metálicas de techos, anuncios publicitarios, canaletas y otros, que tienen instalado equipamiento eléctrico y se encuentran al alcance de una persona parada sobre el piso, deben estar conectados al sistema de puesta a tierra. CNE-U 060.002, 060.400
+3.1.9	"La carcaza y motor del ascensor, montacargas, escaleras mecánicas y de equipos de elevación eléctrica, deben estar conectados al sistema de puesta a tierra.
+CNE-U 200.046, 200.048"
+3.1.10	"El ascensor, montacargas, escaleras mecanicas y equipos de elevacion electrica, cuentan con constancia de operatividad y mantenimiento, firmado por ing. mecánico, electricista o mecánico electricista colegiado y habilitado.
+CNE-U 010.010.3"
+3.1.11	Los conductores eléctricos utilizados se encuentran protegidos con tubos o canaletas de PVC. CNE-U 070.212
+3.1.12	Las cajas de paso de conductores eléctricos deben tener tapa. CNE-U 070.3002, 070.3004
+3.1.13	La subestación esta protegida con cercos, tabiques o paredes para limitar el acceso de personas no autorizadas. La estructura metálica esta conectada al sistema de puesta a tierra. SUM 110.A.1
+3.1.14	"Las estructuras metálicas de soporte y/o los equipos electrónicos, deben estar conectados al sistema de puesta a tierra. 
+CNE-U 060.102, 060.106"
+3.1.15	"Las máquinas tragamonedas no presentan superficies energizadas y están conectadas al sistema de puesta a tierra.
+CNE-U 060.106, 010.010.3"
+3.1.16	"Los equipos electromecánicos de gimnasios deben estar conectados al sistema de puesta a tierra.
+CNE-U 060.106, 010.010.3"
+3.1.17	Los diagramas unifilares, plano(s) de distribución de tableros electricos y cuadro de cargas concuerdan con lo verificado físicamente. RNE GE 020 Art.14, CNE-U 010.008
+3.2.1	Las rampas tienen una pendiente no mayor al 12% permitiendo la evacuación, tienen pisos antideslizantes y tienen barandas. RNE A.130, Art. 16
+3.2.2	Las aberturas al exterior ubicadas a una altura mayor a 1.00 m sobre el suelo, en tragaluces, escaleras y azotea cuentan con protección al vacío de altura mínima de 1.00m, para evitar  caídas al vacío. RNE NTE 060 Art. 11; RNE A.010 Art. 33
+3.2.3	No hay objetos sueltos o mal aseguradoa en los techos, cielorasos, falsocielorasos, como luminarias, ventiladores, equipos, etc, y que pueden que puedan caer sobre una persona.
+3.3.1	Las estructuras que soportan las antenas y/o paneles publicitarios son seguras, estables, tienen anclajes y se encuentran en buen estado de conservación, no presentan óxido o corrosión, inclinaciones que podrían desestabilizarlas y ocasionar su colapso. RNE E.090, GE.040 Art. 11 y 12.
+3.3.2	Las estructuras metálicas de soporte de productos de almacenamiento (racks) están fijas, asegurando su estabilidad, se encuentran en buen estado de conservación, no presentan óxido o corrosión, inclinaciones que podrían desestabilizarlas y ocasionar su colapso. RNE E.090, GE.040 Art. 11 y 12
+3.3.3	Las estructuras de soporte de equipos de aire acondicionado, condensadores y otros, apoyados en la pared y/o techo, están adecuadamente fijadas y en buen estado de conservación, no presentan óxido ni corrosión. Los equipos instalados sobre estas estructuras se encuentran debidamente asegurados. RNE 0.90, GE.040 Art. 11 y 12
+3.3.4	En caso de contar con sistema el sistema de extracción de monóxido de carbono en sótano, éste se encuentra operativo y cuenta con constancia de operatividad y mantenimiento. RNE A010 Articulo 69
+3.3.5	Los juegos infantiles de carpintería metálica, de madera o plástico, son estables, seguros, están bien instalados y en buen estado de conservación. RNE E.090, E.010, GE.040 Art. 11 y 12
+3.3.6	Las puertas, ventanas, mamparas, techos; enchapes de muros con espejos, ubicados en áreas donde existe el riesgo de impacto accidental o de exposición de las personas ante roturas, que son de vidrio, son de vidrio templado o laminado. En caso de ser de vidrios primarios, tienen láminas de seguridad en todo el paño de vidrio u otro sistema de protección en caso de rotura. RNE E.040 Art. 23 y GE.040 Art. 11 y 12.
+3.3.7	El(los) tablero(s) eléctrico(s) cuenta(n) con identificación. CNE-U 020.100.1, 020.100.3.1
+3.3.8	Tiene directorio de los circuitos, indicando de manera visible y clara la instalación que controla. CNE-U 020.100.1, 020.100.3.1
+3.3.9	Existe espacio libre no menor a un metro frente a los tableros eléctricos. CNE-U 020.308
+3.3.10	Existe iluminación general y de emergencia en la zona de ubicación de los tableros eléctricos. CNE-U 020.314
+3.3.11	Si el establecimiento cuenta con tanque estacionario de  Gas Licuado de Petróleo (GLP) en cantidades superiores a 0.45m3 (118.18gl) y/o liquido combustible y sus derivados en cantidades a partir de 1m3 (264.17gl), llamado Consumidor Directo, debe tener constancia de registro de hidrocarburos emitido por  OSINERGMIN. NTP 321.121
+3.3.12	"En caso de tener caldero: Mostrar el libro del servicio del caldero visado por el Ministerio de Trabajo, el mismo que debe estar actualizado a  la fecha.
+El nivel del agua del caldero debe encontrarse dentro del rango de mínimo y máximo. La presión de trabajo debe ser menor a la presión indicada por el fabricante. El caldero debe contar con valvula de seguridad, presostato y manómetro.
+Para el caso del caldero que se encuentre en una ruta de evacuación debe estar cercado con muros de resistencia al fuego. De utilizar combustible GLP o GN no se permite su instalación en sótano. DS No. 042-F"
+3.3.13	El caldero se encuentra en buen estado de conservación y mantenimiento. DS No. 042-F 
+3.3.14	El caldero se encuentra operado por un personal calificado que cuenta con constancia de capacitación actualizada emitido por profesional o empresa especializada. DS No. 042-F
+3.3.15	"Para edificaciones con giro de explosivos, artefactos pirotécnicos y otros afines:
+Cuenta con sistemas a prueba de explosión, si corresponde. Ley No. 30299 y su Reglamento Decreto Supremo No. 010-2017-IN"
+S/N	Otras observaciones
