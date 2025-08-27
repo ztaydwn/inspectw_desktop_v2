@@ -27,14 +27,16 @@ def _create_group_lookup(txt_grupos: str) -> Dict[str, str]:
     """Convierte el texto de grupos.txt en un diccionario para búsqueda rápida."""
     lookup = {}
     for line in txt_grupos.splitlines():
-        if not line.strip():
+        full_line = line.strip()
+        if not full_line:
             continue
-        # Dividir por el primer tabulador que encuentre
-        parts = line.strip().split('\t', 1)
+        
+        # La clave sigue siendo solo el código, para una búsqueda limpia
+        parts = full_line.split('\t', 1)
         if len(parts) == 2:
             key = parts[0].strip()
-            value = parts[1].strip()
-            lookup[key] = value
+            # El valor ahora es la línea completa, para no perder la numeración
+            lookup[key] = full_line
     return lookup
 
 def _parse_descriptions(txt_descriptions: str, group_lookup: Dict[str, str]) -> list[Foto]:

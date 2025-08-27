@@ -42,7 +42,7 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
                 Inches(slide_w_in - 2 * margin_x), Inches(0.5)
             )
             p_title = title_box.text_frame.paragraphs[0]
-            p_title.text = f"Grupo: {gname}"
+            p_title.text = gname
             if p_title.runs:
                 p_title.runs[0].font.size = Pt(20)
 
