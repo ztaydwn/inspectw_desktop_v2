@@ -65,7 +65,7 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
                 y = margin_y_top + r * (cell_h + spacing_y)
 
                 img_path = f"{foto.carpeta}/{foto.filename}"
-                img_data = archivos.get(img_path) or archivos.get(img_path.replace('/','\\'))
+                img_data = archivos.get(img_path) or archivos.get(img_path.replace('/', '\\'))
 
                 if img_data:
                     img = Image.open(io.BytesIO(img_data))
@@ -126,19 +126,20 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
             tf_det = body_det.text_frame
             tf_det.clear()
 
-            # Enumerar descripciones aplicando la nueva lógica de recorte
+            # Enumerar descripciones con lógica de recorte y añadido de carpeta
             for idx, foto in enumerate(chunk, start=1):
                 full_detail = foto.specific_detail
-                detail_to_show = ""
-                # Si hay un '+', tomar solo el texto después de él
-                if '+' in full_detail:
-                    # Usamos split con maxsplit=1 por si hay más de un '+'
-                    detail_to_show = full_detail.split('+', 1)[1].strip()
-                else:
-                    # Si no hay '+', mostramos el texto original
-                    detail_to_show = full_detail
                 
-                desc_text = f"{idx}. {detail_to_show}"
+                # Extraer el texto después del '+'
+                if '+' in full_detail:
+                    detail_after_plus = full_detail.split('+', 1)[1].strip()
+                else:
+                    detail_after_plus = full_detail
+                
+                # Combinar con el texto de la carpeta (que viene de los corchetes)
+                final_text = f"{detail_after_plus} {foto.carpeta}"
+                
+                desc_text = f"{idx}. {final_text}"
                 p = tf_det.add_paragraph()
                 p.text = desc_text
                 if p.runs:
