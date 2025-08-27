@@ -38,19 +38,22 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
         for page in range(pages):
             slide = prs.slides.add_slide(blank_layout)
 
+            # --- INICIO DE LA CORRECCIÓN AVANZADA DE TÍTULO ---
             title_box = slide.shapes.add_textbox(
                 Inches(margin_x), Inches(0.3),
-                Inches(slide_w_in - 2 * margin_x), Inches(0.5)
+                Inches(slide_w_in - 2 * margin_x), Inches(0.75) # Mantener altura aumentada
             )
-            # --- INICIO DE LA CORRECCIÓN DE TÍTULO ---
-            # Activar autoajuste para que el texto se adapte al cuadro
-            title_box.text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-            p_title = title_box.text_frame.paragraphs[0]
+            tf = title_box.text_frame
+            # 1. Activar autoajuste para que el texto se reduzca para caber
+            tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+            # 2. Asegurar que el texto se divida en varias líneas
+            tf.word_wrap = True
+            
+            p_title = tf.paragraphs[0]
             p_title.text = gname
-            # Se establece un tamaño de fuente grande, que se reducirá si es necesario
-            if p_title.runs:
-                p_title.runs[0].font.size = Pt(18)
-            # --- FIN DE LA CORRECCIÓN DE TÍTULO ---
+            # 3. Establecer un tamaño de fuente INICIAL grande. Autoajuste lo reducirá si es necesario.
+            p_title.font.size = Pt(16)
+            # --- FIN DE LA CORRECCIÓN AVANZADA DE TÍTULO ---
 
             label_y = margin_y_top - 0.3
             label_box = slide.shapes.add_textbox(
