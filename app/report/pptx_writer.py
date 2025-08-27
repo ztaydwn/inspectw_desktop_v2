@@ -6,6 +6,7 @@ from PIL import Image, ImageOps
 import io, math
 from typing import Dict
 from ..core.processing import Grupo, Foto
+from ..utils.nlg_utils import agrupa_y_redacta
 
 def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, bytes],
                                  output_pptx_path: str, max_px: int = 1600) -> None:
@@ -126,22 +127,20 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
             tf_det = body_det.text_frame
             tf_det.clear()
 
-            # Enumerar descripciones con la plantilla de oración final
-            for idx, foto in enumerate(chunk, start=1):
+            # 1) Construir entradas (descripcion, variable) desde tus dos textos
+            entradas = []
+            for foto in chunk:
                 full_detail = foto.specific_detail
-                
-                # Extraer el texto después del '+'
-                if '+' in full_detail:
-                    detail_after_plus = full_detail.split('+', 1)[1].strip()
-                else:
-                    detail_after_plus = full_detail
-                
-                # Construir la oración final con la plantilla "Se encontro... en..."
-                final_text = f"Se encontro {detail_after_plus} en {foto.carpeta}"
-                
-                desc_text = f"{idx}. {final_text}"
+                detail_after_plus = full_detail.split('+', 1)[1].strip() if '+' in full_detail else full_detail
+                entradas.append((detail_after_plus, foto.carpeta))
+
+            # 2) Generar oraciones agrupadas con NLG (umbral ajustable)
+            oraciones = agrupa_y_redacta(entradas, umbral_similitud=0.8)
+
+            # 3) Pintar el resultado enumerado en la caja de “UBICACIÓN Y DETALLE”
+            for idx, sentencia in enumerate(oraciones, start=1):
                 p = tf_det.add_paragraph()
-                p.text = desc_text
+                p.text = f"{idx}. {sentencia}"
                 if p.runs:
                     run = p.runs[0]
                     run.font.size = Pt(10)
