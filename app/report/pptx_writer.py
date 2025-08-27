@@ -1,0 +1,166 @@
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.enum.shapes import MSO_SHAPE
+from pptx.dml.color import RGBColor
+from PIL import Image, ImageOps
+import io, math
+from typing import Dict
+from ..core.processing import Grupo
+
+def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, bytes],
+                                 output_pptx_path: str, max_px: int = 1600) -> None:
+    """
+    Crea un archivo PPTX en formato de informe A4 vertical (sección fotos 4x3 + área inferior
+    para 'UBICACIÓN Y DETALLE' y 'RECOMENDACIONES').
+    """
+    prs = Presentation()
+    # Definir tamaño A4 vertical
+    prs.slide_width = Inches(8.27)
+    prs.slide_height = Inches(11.69)
+    blank_layout = prs.slide_layouts[6]
+
+    # Layout: 4x3 fotos
+    cols, rows = 4, 3
+    margin_x = 0.4
+    margin_y_top = 1.2
+    margin_y_bottom = 0.4
+    enumerated_h = 2.5
+    spacing_x = 0.1
+    spacing_y = 0.1
+
+    slide_w_in = prs.slide_width / 914400.0
+    slide_h_in = prs.slide_height / 914400.0
+    photo_area_h = slide_h_in - margin_y_top - enumerated_h - margin_y_bottom
+    cell_w = (slide_w_in - 2 * margin_x - (cols - 1) * spacing_x) / cols
+    cell_h = (photo_area_h - (rows - 1) * spacing_y) / rows
+
+    for gname, grupo in grupos.items():
+        per_slide = cols * rows
+        total = len(grupo.fotos)
+        pages = math.ceil(total / per_slide) if per_slide else 0
+
+        for page in range(pages):
+            slide = prs.slides.add_slide(blank_layout)
+
+            # Título del grupo
+            title_box = slide.shapes.add_textbox(
+                Inches(margin_x), Inches(0.3),
+                Inches(slide_w_in - 2 * margin_x), Inches(0.5)
+            )
+            p_title = title_box.text_frame.paragraphs[0]
+            p_title.text = f"Grupo: {gname}"
+            if p_title.runs:
+                p_title.runs[0].font.size = Pt(20)
+
+            # Etiqueta "FOTOGRAFÍAS"
+            label_y = margin_y_top - 0.3
+            label_box = slide.shapes.add_textbox(
+                Inches(margin_x), Inches(label_y),
+                Inches(3), Inches(0.4)
+            )
+            p_label = label_box.text_frame.paragraphs[0]
+            p_label.text = "FOTOGRAFÍAS:"
+            if p_label.runs:
+                run_label = p_label.runs[0]
+                run_label.font.bold = True
+                run_label.font.size = Pt(12)
+
+            # Procesar fotos para esta página
+            chunk = grupo.fotos[page * per_slide:(page + 1) * per_slide]
+            for idx, foto in enumerate(chunk):
+                r = idx // cols
+                c = idx % cols
+                x = margin_x + c * (cell_w + spacing_x)
+                y = margin_y_top + r * (cell_h + spacing_y)
+
+                # Obtener y procesar imagen del ZIP
+                img_path = f"{foto.carpeta}/{foto.filename}"
+                img_data = archivos.get(img_path) or archivos.get(img_path.replace('/', '\\'))
+
+                if img_data:
+                    img = Image.open(io.BytesIO(img_data))
+                    img = ImageOps.exif_transpose(img)
+                    img.thumbnail((max_px, max_px), Image.LANCZOS)
+                    if img.mode in ("RGBA", "LA"):
+                        img = img.convert("RGB")
+                    buffer = io.BytesIO()
+                    img.save(buffer, format="JPEG", quality=80, optimize=True)
+                    buffer.seek(0)
+
+                    slide.shapes.add_picture(
+                        buffer, Inches(x), Inches(y),
+                        width=Inches(cell_w), height=Inches(cell_h)
+                    )
+
+            # Área inferior para descripciones y recomendaciones
+            enum_y = slide_h_in - enumerated_h - margin_y_bottom
+            enum_x = margin_x
+            enum_w = slide_w_in - 2 * margin_x
+            header_h = 0.4
+            content_h = enumerated_h - header_h
+            details_w = enum_w * 0.7
+            recom_w = enum_w - details_w
+
+            # Cabecera detalles
+            header_det = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                Inches(enum_x), Inches(enum_y),
+                Inches(details_w), Inches(header_h)
+            )
+            header_det.fill.solid()
+            header_det.fill.fore_color.rgb = RGBColor(217, 217, 217)
+            header_det.line.color.rgb = header_det.fill.fore_color.rgb
+            txt_hd = header_det.text_frame
+            txt_hd.text = "UBICACIÓN Y DETALLE:"
+            if txt_hd.paragraphs[0].runs:
+                txt_hd.paragraphs[0].runs[0].font.bold = True
+
+            # Cabecera recomendaciones
+            header_rec = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                Inches(enum_x + details_w), Inches(enum_y),
+                Inches(recom_w), Inches(header_h)
+            )
+            header_rec.fill.solid()
+            header_rec.fill.fore_color.rgb = RGBColor(217, 217, 217)
+            header_rec.line.color.rgb = header_rec.fill.fore_color.rgb
+            txt_hr = header_rec.text_frame
+            txt_hr.text = "RECOMENDACIONES:"
+            if txt_hr.paragraphs[0].runs:
+                txt_hr.paragraphs[0].runs[0].font.bold = True
+
+            # Cuerpo detalles
+            body_det = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                Inches(enum_x), Inches(enum_y + header_h),
+                Inches(details_w), Inches(content_h)
+            )
+            body_det.fill.solid()
+            body_det.fill.fore_color.rgb = RGBColor(255, 255, 255)
+            body_det.line.color.rgb = body_det.fill.fore_color.rgb
+            tf_det = body_det.text_frame
+            tf_det.clear()
+
+            # Enumerar descripciones
+            for idx, foto in enumerate(chunk, start=1):
+                desc_text = f"{idx}. {foto.description_base}"
+                if foto.detalle:
+                    desc_text += f" + {foto.detalle}"
+                p = tf_det.add_paragraph()
+                p.text = desc_text
+                if p.runs:
+                    run = p.runs[0]
+                    run.font.size = Pt(10)
+                    run.font.color.rgb = RGBColor(0, 0, 0)
+
+            # Cuerpo recomendaciones (verde claro)
+            body_rec = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                Inches(enum_x + details_w), Inches(enum_y + header_h),
+                Inches(recom_w), Inches(content_h)
+            )
+            body_rec.fill.solid()
+            body_rec.fill.fore_color.rgb = RGBColor(226, 240, 217)
+            body_rec.line.color.rgb = body_rec.fill.fore_color.rgb
+
+    prs.save(output_pptx_path)
