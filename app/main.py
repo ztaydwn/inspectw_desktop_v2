@@ -56,7 +56,8 @@ class MainWindow(QWidget):
         path, _ = QFileDialog.getOpenFileName(self, "Selecciona ZIP", "", "ZIP (*.zip)")
         if not path: return
         self.archivos = cargar_zip(path)
-        self.grupos = procesar_zip(self.archivos)
+        # pasa la ruta del histórico si el usuario la cargó; si no, usa la ruta por defecto
+        self.grupos = procesar_zip(self.archivos, hist_path=self.hist_path)
         self.lista.clear()
         self.listaFotos.clear()
         for k, g in self.grupos.items():
@@ -70,37 +71,26 @@ class MainWindow(QWidget):
             return
 
         key = current.data(Qt.ItemDataRole.UserRole)
-        print(f"\n--- Grupo seleccionado: {key} ---")
         if key not in self.grupos:
-            print(f"Error: Clave '{key}' no encontrada en self.grupos.")
             return
 
         grupo = self.grupos[key]
-        print(f"Procesando {len(grupo.fotos)} fotos en este grupo.")
         
         for foto in grupo.fotos:
             path_in_zip = f"{foto.carpeta}/{foto.filename}"
-            print(f"Buscando imagen en la ruta: '{path_in_zip}'")
             img_data = self.archivos.get(path_in_zip)
             
             if img_data is None:
                 path_in_zip_alt = path_in_zip.replace('/', '\\')
-                print(f"No encontrada. Intentando ruta alternativa: '{path_in_zip_alt}'")
                 img_data = self.archivos.get(path_in_zip_alt)
 
             if img_data:
-                print("¡Imagen encontrada en el ZIP!")
                 pixmap = QPixmap()
                 pixmap.loadFromData(img_data)
                 if not pixmap.isNull():
-                    print("Pixmap cargado correctamente. Añadiendo a la lista.")
                     item = QListWidgetItem(foto.filename)
                     item.setIcon(QIcon(pixmap))
                     self.listaFotos.addItem(item)
-                else:
-                    print("Error: QPixmap no pudo cargar los datos de la imagen.")
-            else:
-                print("Error: No se encontraron datos para esta imagen en el ZIP.")
 
     def on_generar_reporte(self):
         if not self.grupos:
@@ -115,16 +105,6 @@ class MainWindow(QWidget):
         path, _ = QFileDialog.getOpenFileName(self, "Selecciona historico.csv", "", "CSV (*.csv)")
         if path:
             self.hist_path = path
-
-    def on_cargar_zip(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Selecciona ZIP", "", "ZIP (*.zip)")
-        if not path: return
-        archivos = cargar_zip(path)
-        # pasa la ruta del histórico si el usuario la cargó; si no, usa la ruta por defecto
-        self.grupos = procesar_zip(archivos, hist_path=self.hist_path)
-        self.lista.clear()
-        for k, g in self.grupos.items():
-            self.lista.addItem(f"{k} ({len(g.fotos)} fotos)")
 
 def main():
     app = QApplication(sys.argv)

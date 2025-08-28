@@ -1,7 +1,7 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, List, Tuple, Dict
 from difflib import SequenceMatcher
-from __future__ import annotations
 import re, unicodedata, pandas as pd
 
 _WORD_RE = re.compile(r"[a-zA-ZáéíóúñüÁÉÍÓÚÑÜ0-9]+")

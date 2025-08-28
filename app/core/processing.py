@@ -5,7 +5,6 @@ from pathlib import Path
 from app.core.recommend import load_engine, RecommendationEngine
 
 # Ruta opcional al histórico; si es None se usa el valor por defecto
-hist_path: str | None = None
 HIST_DEFAULT = Path("datos/historico.csv")
 
 @dataclass
@@ -83,7 +82,7 @@ def asignar_recomendaciones(grupos: Dict[str, Grupo], engine: RecommendationEngi
         sugerencias = engine.suggest(query=g.descripcion, extra_text=extra, top_k=top_k)
         g.recomendaciones = [rec for _, rec in sugerencias] or g.recomendaciones
 
-def procesar_zip(archivos: Dict[str, bytes]) -> Dict[str, Grupo]:
+def procesar_zip(archivos: Dict[str, bytes], hist_path: str | None = None) -> Dict[str, Grupo]:
     # Leer ambos archivos de texto del zip
     txt_descriptions = archivos.get("descriptions.txt", b"").decode("utf-8", errors="ignore")
     txt_grupos = archivos.get("grupos.txt", b"").decode("utf-8", errors="ignore")
@@ -107,7 +106,7 @@ def procesar_zip(archivos: Dict[str, bytes]) -> Dict[str, Grupo]:
         asignar_recomendaciones(grupos, engine, top_k=2)
     except Exception as e:
         # Si no existe el CSV o falla, continúa sin recomendaciones
-        print(f"[WARN] No se pudo cargar historico.csv: {e}")
+        pass
     return grupos
 
     
