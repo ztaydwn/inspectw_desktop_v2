@@ -1,6 +1,12 @@
 import zipfile, re
 from dataclasses import dataclass, field
 from typing import Dict
+from pathlib import Path
+from app.core.recommend import load_engine, RecommendationEngine
+
+# Ruta opcional al histórico; si es None se usa el valor por defecto
+hist_path: str | None = None
+HIST_DEFAULT = Path("datos/historico.csv")
 
 @dataclass
 class Foto:
@@ -69,6 +75,13 @@ def _parse_descriptions(txt_descriptions: str, group_lookup: Dict[str, str]) -> 
             ))
             bloque = {}
     return fotos
+def asignar_recomendaciones(grupos: Dict[str, Grupo], engine: RecommendationEngine, top_k: int = 1):
+    """Rellena grupo.recomendaciones usando el motor."""
+    for g in grupos.values():
+        # Usa descripción base + agregación de detalles/ubicaciones para contextualizar la consulta
+        extra = ", ".join(sorted({f"{f.carpeta} {f.specific_detail}".strip() for f in g.fotos if f.specific_detail or f.carpeta}))[:400]
+        sugerencias = engine.suggest(query=g.descripcion, extra_text=extra, top_k=top_k)
+        g.recomendaciones = [rec for _, rec in sugerencias] or g.recomendaciones
 
 def procesar_zip(archivos: Dict[str, bytes]) -> Dict[str, Grupo]:
     # Leer ambos archivos de texto del zip
@@ -86,6 +99,15 @@ def procesar_zip(archivos: Dict[str, bytes]) -> Dict[str, Grupo]:
         # Agrupar por el nombre oficial del grupo
         g = grupos.setdefault(f.group_name, Grupo(descripcion=f.group_name))
         g.fotos.append(f)
-        
-    # TODO: cargar historico.csv, asignar recomendaciones
+    
+    # Cargar histórico y asignar recomendaciones    
+    try:
+        hp = Path(hist_path) if hist_path else HIST_DEFAULT
+        engine = load_engine(str(hp))
+        asignar_recomendaciones(grupos, engine, top_k=2)
+    except Exception as e:
+        # Si no existe el CSV o falla, continúa sin recomendaciones
+        print(f"[WARN] No se pudo cargar historico.csv: {e}")
     return grupos
+
+    

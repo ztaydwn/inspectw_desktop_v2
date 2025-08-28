@@ -22,6 +22,9 @@ class MainWindow(QWidget):
         self.listaFotos.setIconSize(QSize(128, 128))
         self.listaFotos.setResizeMode(QListWidget.ResizeMode.Adjust)
         self.listaFotos.setWordWrap(True)
+        self.btnHist = QPushButton("Cargar historico.csv (opcional)")
+        self.btnHist.clicked.connect(self.on_cargar_hist)
+        self.hist_path = None
 
         main_layout = QVBoxLayout(self)
         
@@ -38,6 +41,7 @@ class MainWindow(QWidget):
         self.btnPptMosaic.setToolTip("Función no disponible en esta versión.")
 
         main_layout.addWidget(self.btnZip)
+        main_layout.addWidget(self.btnHist)
         main_layout.addLayout(h_layout)
         main_layout.addLayout(export_layout)
 
@@ -106,6 +110,21 @@ class MainWindow(QWidget):
         if not destino: return
         export_groups_to_pptx_report(self.grupos, self.archivos, destino)
         QMessageBox.information(self, "Listo", f"Guardado en:\n{destino}")
+        
+    def on_cargar_hist(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Selecciona historico.csv", "", "CSV (*.csv)")
+        if path:
+            self.hist_path = path
+
+    def on_cargar_zip(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Selecciona ZIP", "", "ZIP (*.zip)")
+        if not path: return
+        archivos = cargar_zip(path)
+        # pasa la ruta del histórico si el usuario la cargó; si no, usa la ruta por defecto
+        self.grupos = procesar_zip(archivos, hist_path=self.hist_path)
+        self.lista.clear()
+        for k, g in self.grupos.items():
+            self.lista.addItem(f"{k} ({len(g.fotos)} fotos)")
 
 def main():
     app = QApplication(sys.argv)

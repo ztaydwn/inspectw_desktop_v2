@@ -9,6 +9,16 @@ from typing import Dict
 from ..core.processing import Grupo, Foto
 from ..utils.nlg_utils import agrupa_y_redacta
 
+def _add_textbox(slide, left, top, width, height, text, size=11):
+    tb = slide.shapes.add_textbox(left, top, width, height)
+    tf = tb.text_frame
+    tf.clear()
+    p = tf.paragraphs[0]
+    run = p.add_run()
+    run.text = text
+    run.font.size = Pt(size)
+    return tb
+
 def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, bytes],
                                  output_pptx_path: str, max_px: int = 1600) -> None:
     prs = Presentation()
@@ -163,5 +173,15 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
             body_rec.fill.solid()
             body_rec.fill.fore_color.rgb = RGBColor(226, 240, 217)
             body_rec.line.color.rgb = body_rec.fill.fore_color.rgb
+            tf_rec = body_rec.text_frame
+            tf_rec.clear()
+
+            recs = getattr(grupo, "recomendaciones", None) or []
+            rec_text = "\n".join(f"• {r}" for r in recs) if recs else "—"
+
+            p = tf_rec.paragraphs[0]
+            p.text = rec_text
+            if p.runs:
+                p.runs[0].font.size = Pt(10)
 
     prs.save(output_pptx_path)
