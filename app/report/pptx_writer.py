@@ -84,22 +84,45 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
                 x = margin_x + c * (cell_w + spacing_x)
                 y = margin_y_top + r * (cell_h + spacing_y)
 
-                img_path = f"{foto.carpeta}/{foto.filename}"
-                img_data = archivos.get(img_path) or archivos.get(img_path.replace('/','\\'))
+                # Intentar diferentes variaciones de la ruta
+                posible_paths = [
+                    f"{foto.carpeta}/{foto.filename}",  # Unix style
+                    f"{foto.carpeta}\\{foto.filename}",  # Windows style
+                    foto.filename,  # Solo nombre del archivo
+                    f"{foto.carpeta.replace('/', '\\')}\\{foto.filename}"  # Windows style con carpeta normalizada
+                ]
+                
+                img_data = None
+                for path in posible_paths:
+                    img_data = archivos.get(path)
+                    if img_data:
+                        break
 
                 if img_data:
-                    img = Image.open(io.BytesIO(img_data))
-                    img = ImageOps.exif_transpose(img)
-                    img.thumbnail((max_px, max_px), Image.LANCZOS)
-                    if img.mode in ("RGBA", "LA"):
-                        img = img.convert("RGB")
-                    buffer = io.BytesIO()
-                    img.save(buffer, format="JPEG", quality=80, optimize=True)
-                    buffer.seek(0)
-                    slide.shapes.add_picture(
-                        buffer, Inches(x), Inches(y),
-                        width=Inches(cell_w), height=Inches(cell_h)
-                    )
+                    try:
+                        # Abrir y procesar la imagen
+                        img = Image.open(io.BytesIO(img_data))
+                        img = ImageOps.exif_transpose(img)
+                        
+                        # Asegurarse de que la imagen esté en el modo correcto
+                        if img.mode in ("RGBA", "LA", "P"):
+                            img = img.convert("RGB")
+                            
+                        # Redimensionar la imagen manteniendo la proporción
+                        img.thumbnail((max_px, max_px), Image.LANCZOS)
+                        
+                        # Guardar en buffer
+                        buffer = io.BytesIO()
+                        img.save(buffer, format="JPEG", quality=80, optimize=True)
+                        buffer.seek(0)
+                        
+                        # Agregar al slide
+                        slide.shapes.add_picture(
+                            buffer, Inches(x), Inches(y),
+                            width=Inches(cell_w), height=Inches(cell_h)
+                        )
+                    except Exception as e:
+                        print(f"Error procesando imagen {foto.filename}: {str(e)}")
 
             enum_y = slide_h_in - enumerated_h - margin_y_bottom
             enum_x = margin_x
