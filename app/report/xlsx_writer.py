@@ -190,17 +190,24 @@ def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
         # --- Details and Recommendations Content ---
         details_content_cell = ws[f'A{current_row}']
         ws.merge_cells(start_row=current_row, start_column=1, end_row=current_row + 5, end_column=2)
+        # Aplicar borde a la sección de detalles
+        apply_border_to_range(ws, f'A{current_row}', f'B{current_row + 5}')
         
         rec_content_cell = ws[f'C{current_row}']
         ws.merge_cells(start_row=current_row, start_column=3, end_row=current_row + 5, end_column=4)
+        # Aplicar borde a la sección de recomendaciones
+        apply_border_to_range(ws, f'C{current_row}', f'D{current_row + 5}')
 
         # --- NLG for Details ---
         entradas = []
-        for foto in grupo.fotos:
+        for idx, foto in enumerate(grupo.fotos, start=1):
+            # Numeración continua de fotos
+            foto_num = idx
             full_detail = foto.specific_detail
             detail_after_plus = full_detail.split('+', 1)[1].strip() if '+' in full_detail else full_detail
-            entradas.append((detail_after_plus, foto.carpeta))
-
+            # Incluir el número de foto en la entrada
+            entradas.append((detail_after_plus, f"{foto.carpeta} [Foto {foto_num}]"))
+            
         oraciones = agrupa_y_redacta(entradas, umbral_similitud=0.8)
         details_text = "\n".join(f"{idx}. {sentencia}" for idx, sentencia in enumerate(oraciones, start=1))
         
