@@ -9,7 +9,10 @@ from typing import Dict
 from app.core.processing import Grupo
 from app.utils.nlg_utils import agrupa_y_redacta
 from PIL import Image, ImageOps
-import io, math, os
+import io, math, os, re
+
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s[0])]
 
 def apply_border_to_range(ws, start_cell, end_cell, border_style='thin'):
     """Aplica bordes a un rango de celdas."""
@@ -51,7 +54,10 @@ def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
     green_fill = PatternFill(start_color="E2F0D9", end_color="E2F0D9", fill_type="solid")
     thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
 
-    for gname, grupo in grupos.items():
+    # Natural sort for group names
+    sorted_grupos = sorted(grupos.items(), key=natural_sort_key)
+
+    for gname, grupo in sorted_grupos:
         # Replace invalid characters for sheet titles
         invalid_chars = ['/', '\\', '?', '*', '[', ']']
         sanitized_gname = gname
@@ -133,6 +139,7 @@ def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
                     try:
                         # Procesar la imagen
                         img = Image.open(io.BytesIO(img_data))
+                        img = ImageOps.exif_transpose(img)  # Corregir orientación
                         
                         # Convertir a RGB si es necesario
                         if img.mode in ("RGBA", "LA", "P"):
