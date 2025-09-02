@@ -154,7 +154,7 @@ def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
                         height = int(img.height * ratio)
                         
                         # Redimensionar usando alta calidad
-                        img = img.resize((width, height), Image.LANCZOS)
+                        img = img.resize((width, height), Image.BICUBIC)
                         
                         # Guardar en memoria
                         img_bytes = io.BytesIO()

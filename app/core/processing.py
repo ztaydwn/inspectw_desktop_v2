@@ -51,7 +51,7 @@ def _create_group_lookup(txt_grupos: str) -> Dict[str, str]:
             continue
         
         # La clave sigue siendo solo el código, para una búsqueda limpia
-        parts = full_line.split('\t', 1)
+        parts = re.split(r'\s+', full_line, 1)
         if len(parts) == 2:
             key = parts[0].strip()
             # El valor ahora es la línea completa, para no perder la numeración
@@ -73,13 +73,13 @@ def _parse_descriptions(txt_descriptions: str, group_lookup: Dict[str, str]) -> 
             desc_content = line.split(":", 1)[1].strip()
             
             # Extraer el código numérico y el detalle específico
-            desc_parts = desc_content.split('\t', 1)
+            desc_parts = re.split(r'\s+', desc_content, 1)
             numbering_code = desc_parts[0].strip()
             specific_detail = desc_parts[1].strip() if len(desc_parts) > 1 else ''
             
             # Buscar el nombre oficial del grupo usando el código
             official_group_name = group_lookup.get(numbering_code, f"Grupo no encontrado para '{numbering_code}'")
-            
+
             fotos.append(Foto(
                 filename=bloque["filename"],
                 group_name=official_group_name,
@@ -121,5 +121,3 @@ def procesar_zip(archivos: Dict[str, bytes], hist_path: str | None = None) -> Di
     except Exception as e:
         print(f"[WARN] No se pudo cargar histórico: {e}")
     return grupos
-
-    
