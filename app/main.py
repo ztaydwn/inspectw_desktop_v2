@@ -3,9 +3,9 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
                              QMessageBox)
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import QSize, Qt
-from .core.processing import cargar_zip, procesar_zip
-from .report.pptx_writer import export_groups_to_pptx_report
-from .report.xlsx_writer import export_groups_to_xlsx_report
+from app.core.processing import cargar_zip, procesar_zip
+from app.report.pptx_writer import export_groups_to_pptx_report
+from app.report.xlsx_writer import export_groups_to_xlsx_report
 import sys, os
 
 class MainWindow(QWidget):
@@ -15,7 +15,6 @@ class MainWindow(QWidget):
         self.resize(900, 600)
 
         self.btnZip = QPushButton("Cargar ZIP")
-        self.btnPptMosaic = QPushButton("Generar Mosaico (PPTX)")
         self.btnPptReport = QPushButton("Generar Informe A4 (PPTX)")
         self.btnXlsxReport = QPushButton("Generar Informe (XLSX)")
         self.lista = QListWidget()
@@ -31,17 +30,15 @@ class MainWindow(QWidget):
         main_layout = QVBoxLayout(self)
         
         h_layout = QHBoxLayout()
-        h_layout.addWidget(self.lista, 1)
-        h_layout.addWidget(self.listaFotos, 3)
+        h_layout.addWidget(self.lista, 2)
+        h_layout.addWidget(self.listaFotos, 2)
 
         # Crear layout para los botones de exportación
         export_layout = QHBoxLayout()
-        export_layout.addWidget(self.btnPptMosaic)
         export_layout.addWidget(self.btnPptReport)
         export_layout.addWidget(self.btnXlsxReport)
         
-        self.btnPptMosaic.setEnabled(False)
-        self.btnPptMosaic.setToolTip("Función no disponible en esta versión.")
+        
 
         main_layout.addWidget(self.btnZip)
         main_layout.addWidget(self.btnHist)

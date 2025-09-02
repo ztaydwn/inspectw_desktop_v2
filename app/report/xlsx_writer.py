@@ -6,8 +6,8 @@ import openpyxl.drawing.image
 from openpyxl.drawing.spreadsheet_drawing import OneCellAnchor, AnchorMarker
 from openpyxl.utils.units import pixels_to_EMU
 from typing import Dict
-from ..core.processing import Grupo
-from ..utils.nlg_utils import agrupa_y_redacta
+from app.core.processing import Grupo
+from app.utils.nlg_utils import agrupa_y_redacta
 from PIL import Image, ImageOps
 import io, math, os
 
@@ -52,7 +52,13 @@ def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
     thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
 
     for gname, grupo in grupos.items():
-        sheet_name = gname[:31] # Sheet name limit is 31 chars
+        # Replace invalid characters for sheet titles
+        invalid_chars = ['/', '\\', '?', '*', '[', ']']
+        sanitized_gname = gname
+        for char in invalid_chars:
+            sanitized_gname = sanitized_gname.replace(char, '-')
+        
+        sheet_name = sanitized_gname[:31]  # Sheet name limit is 31 chars
         ws = wb.create_sheet(title=sheet_name)
 
         # --- Title ---
@@ -188,36 +194,46 @@ def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
         current_row += 1
 
         # --- Details and Recommendations Content ---
-        details_content_cell = ws[f'A{current_row}']
-        ws.merge_cells(start_row=current_row, start_column=1, end_row=current_row + 5, end_column=2)
-        # Aplicar borde a la sección de detalles
-        apply_border_to_range(ws, f'A{current_row}', f'B{current_row + 5}')
-        
-        rec_content_cell = ws[f'C{current_row}']
-        ws.merge_cells(start_row=current_row, start_column=3, end_row=current_row + 5, end_column=4)
-        # Aplicar borde a la sección de recomendaciones
-        apply_border_to_range(ws, f'C{current_row}', f'D{current_row + 5}')
-
-        # --- NLG for Details ---
+        # Preparar el texto primero para calcular el número de líneas
         entradas = []
         for idx, foto in enumerate(grupo.fotos, start=1):
-            # Numeración continua de fotos
             foto_num = idx
             full_detail = foto.specific_detail
             detail_after_plus = full_detail.split('+', 1)[1].strip() if '+' in full_detail else full_detail
-            # Incluir el número de foto en la entrada
             entradas.append((detail_after_plus, f"{foto.carpeta} [Foto {foto_num}]"))
             
         oraciones = agrupa_y_redacta(entradas, umbral_similitud=0.8)
         details_text = "\n".join(f"{idx}. {sentencia}" for idx, sentencia in enumerate(oraciones, start=1))
         
-        set_cell_style(details_content_cell, details_text, size=10, alignment=Alignment(wrap_text=True, vertical='top'))
-        details_content_cell.border = thin_border
-
-
-        # --- Recommendations Text ---
+        # Calcular número de líneas para detalles
+        details_lines = len(details_text.split('\n'))
+        
+        # Calcular número de líneas para recomendaciones
         recs = getattr(grupo, "recomendaciones", None) or []
         rec_text = "\n".join(f"• {r}" for r in recs) if recs else "—"
+        rec_lines = len(rec_text.split('\n'))
+        
+        # Calcular altura necesaria (mínimo 6 filas, más si el contenido lo requiere)
+        # Asumimos aproximadamente 1.2 líneas de texto por fila de Excel para mejor legibilidad
+        needed_rows = max(6, math.ceil(max(details_lines, rec_lines) * 1.2))
+        
+        details_content_cell = ws[f'A{current_row}']
+        ws.merge_cells(start_row=current_row, start_column=1, end_row=current_row + needed_rows - 1, end_column=2)
+        # Aplicar borde a la sección de detalles
+        apply_border_to_range(ws, f'A{current_row}', f'B{current_row + needed_rows - 1}')
+        
+        rec_content_cell = ws[f'C{current_row}']
+        ws.merge_cells(start_row=current_row, start_column=3, end_row=current_row + needed_rows - 1, end_column=4)
+        # Aplicar borde a la sección de recomendaciones
+        apply_border_to_range(ws, f'C{current_row}', f'D{current_row + needed_rows - 1}')
+        
+        # Ajustar la altura de las filas para el contenido
+        for i in range(needed_rows):
+            ws.row_dimensions[current_row + i].height = 20  # altura en puntos
+
+        # --- Set Content ---
+        set_cell_style(details_content_cell, details_text, size=10, alignment=Alignment(wrap_text=True, vertical='top'))
+        details_content_cell.border = thin_border
         
         set_cell_style(rec_content_cell, rec_text, size=10, alignment=Alignment(wrap_text=True, vertical='top'), fill=green_fill)
         rec_content_cell.border = thin_border

@@ -6,8 +6,8 @@ from pptx.dml.color import RGBColor
 from PIL import Image, ImageOps
 import io, math
 from typing import Dict
-from ..core.processing import Grupo, Foto
-from ..utils.nlg_utils import agrupa_y_redacta
+from app.core.processing import Grupo, Foto
+from app.utils.nlg_utils import agrupa_y_redacta
 
 def _add_textbox(slide, left, top, width, height, text, size=11):
     tb = slide.shapes.add_textbox(left, top, width, height)

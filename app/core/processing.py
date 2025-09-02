@@ -2,10 +2,24 @@ import zipfile, re
 from dataclasses import dataclass, field
 from typing import Dict
 from pathlib import Path
+try:
+    from app.core.paths import resource_path
+except Exception:
+    # Fallback por si el import falla en el .exe (PyInstaller)
+    from pathlib import Path
+    import sys
+    def resource_path(rel: str) -> str:
+        base = getattr(sys, "_MEIPASS", None)  # carpeta temporal del .exe
+        if base:
+            return str(Path(base) / rel)
+        # raíz del proyecto en desarrollo
+        return str((Path(__file__).resolve().parents[2] / rel))
+    
+from app.core.recommend import load_engine
 from app.core.recommend import load_engine, RecommendationEngine
 
 # Ruta opcional al histórico; si es None se usa el valor por defecto
-HIST_DEFAULT = Path("datos/historico.csv")
+HIST_DEFAULT = resource_path("datos/historico.csv")
 
 @dataclass
 class Foto:
@@ -101,12 +115,11 @@ def procesar_zip(archivos: Dict[str, bytes], hist_path: str | None = None) -> Di
     
     # Cargar histórico y asignar recomendaciones    
     try:
-        hp = Path(hist_path) if hist_path else HIST_DEFAULT
-        engine = load_engine(str(hp))
+        hp = hist_path or HIST_DEFAULT
+        engine = load_engine(hp)
         asignar_recomendaciones(grupos, engine, top_k=2)
     except Exception as e:
-        # Si no existe el CSV o falla, continúa sin recomendaciones
-        pass
+        print(f"[WARN] No se pudo cargar histórico: {e}")
     return grupos
 
     
