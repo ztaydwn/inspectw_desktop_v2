@@ -96,7 +96,7 @@ def asignar_recomendaciones(grupos: Dict[str, Grupo], engine: RecommendationEngi
         sugerencias = engine.suggest(query=g.descripcion, extra_text=extra, top_k=top_k)
         g.recomendaciones = [rec for _, rec in sugerencias] or g.recomendaciones
 
-def procesar_zip(archivos: Dict[str, bytes], hist_path: str | None = None) -> Dict[str, Grupo]:
+def procesar_zip(archivos: Dict[str, bytes], hist_path: str | None = None) -> tuple[Dict[str, Grupo], str | None]:
     # Leer ambos archivos de texto del zip
     txt_descriptions = archivos.get("descriptions.txt", b"").decode("utf-8", errors="ignore")
     txt_grupos = archivos.get("grupos.txt", b"").decode("utf-8", errors="ignore")
@@ -114,10 +114,25 @@ def procesar_zip(archivos: Dict[str, bytes], hist_path: str | None = None) -> Di
         g.fotos.append(f)
     
     # Cargar histórico y asignar recomendaciones    
+    error_msg = None
     try:
         hp = hist_path or HIST_DEFAULT
         engine = load_engine(hp)
         asignar_recomendaciones(grupos, engine, top_k=2)
     except Exception as e:
         print(f"[WARN] No se pudo cargar histórico: {e}")
-    return grupos
+        error_msg = str(e)
+    
+    return grupos, error_msg
+
+def reaplicar_recomendaciones(grupos: Dict[str, Grupo], hist_path: str) -> str | None:
+    """Toma grupos existentes y aplica/re-aplica recomendaciones desde un archivo."""
+    error_msg = None
+    if not hist_path:
+        return "No se proporcionó una ruta al archivo histórico."
+    try:
+        engine = load_engine(hist_path)
+        asignar_recomendaciones(grupos, engine, top_k=2)
+    except Exception as e:
+        error_msg = str(e)
+    return error_msg
