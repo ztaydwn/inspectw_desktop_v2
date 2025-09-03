@@ -2,27 +2,86 @@ import sys
 import os
 from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QFileDialog, QListWidget, QListWidgetItem,
-                             QMessageBox)
+                             QMessageBox, QProgressDialog)
 from PyQt6.QtGui import QPixmap, QIcon
-from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtCore import QSize, Qt, QObject, QThread, pyqtSignal
 from app.core.processing import cargar_zip, procesar_zip, reaplicar_recomendaciones
 from app.report.pptx_writer import export_groups_to_pptx_report
 from app.report.xlsx_writer import export_groups_to_xlsx_report
+
+class ZipProcessorWorker(QObject):
+    finished = pyqtSignal(dict, dict, list)
+    progress = pyqtSignal(str)
+
+    def __init__(self, paths, hist_path):
+        super().__init__()
+        self.paths = paths
+        self.hist_path = hist_path
+        self._is_running = True
+
+    def run(self):
+        grupos_acumulados, archivos_acumulados, errors = {}, {}, []
+        for i, path in enumerate(self.paths):
+            if not self._is_running: break
+            try:
+                self.progress.emit(f"Procesando {i+1}/{len(self.paths)}: {os.path.basename(path)}...")
+                nuevos_archivos = cargar_zip(path)
+                archivos_acumulados.update(nuevos_archivos)
+                nuevos_grupos, error = procesar_zip(nuevos_archivos, hist_path=self.hist_path)
+                if error: errors.append(f"Error en {os.path.basename(path)}: {error}")
+                for key, grupo_nuevo in nuevos_grupos.items():
+                    if key in grupos_acumulados: grupos_acumulados[key].fotos.extend(grupo_nuevo.fotos)
+                    else: grupos_acumulados[key] = grupo_nuevo
+            except Exception as e:
+                errors.append(f"Error crítico procesando {os.path.basename(path)}: {e}")
+        self.finished.emit(grupos_acumulados, archivos_acumulados, errors)
+
+    def stop(self): self._is_running = False
+
+class ReportWorker(QObject):
+    finished = pyqtSignal(str)
+    progress = pyqtSignal(int)
+
+    def __init__(self, report_type, grupos, archivos, destino):
+        super().__init__()
+        self.report_type = report_type
+        self.grupos = grupos
+        self.archivos = archivos
+        self.destino = destino
+        self._is_running = True
+
+    def run(self):
+        try:
+            if not self._is_running: 
+                self.finished.emit("Generación de informe cancelada.")
+                return
+
+            if self.report_type == 'xlsx':
+                export_groups_to_xlsx_report(self.grupos, self.archivos, self.destino, progress_callback=self.progress)
+            elif self.report_type == 'pptx':
+                export_groups_to_pptx_report(self.grupos, self.archivos, self.destino, progress_callback=self.progress)
+            
+            if self._is_running:
+                self.finished.emit(f"¡Informe guardado con éxito en:\n{self.destino}")
+        except Exception as e:
+            self.finished.emit(f"Ocurrió un error al generar el informe:\n{e}")
+
+    def stop(self): self._is_running = False
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("InspectW Desktop")
         self.resize(900, 600)
+        self.thread = None
+        self.worker = None
 
-        # --- Botones ---
+        # --- Widgets ---
         self.btnZip = QPushButton("Cargar ZIP(s)")
         self.btnClear = QPushButton("Limpiar")
         self.btnPptReport = QPushButton("Generar Informe A4 (PPTX)")
         self.btnXlsxReport = QPushButton("Generar Informe (XLSX)")
         self.btnHist = QPushButton("Cargar historico.csv (opcional)")
-
-        # --- Listas ---
         self.lista = QListWidget()
         self.listaFotos = QListWidget()
         self.listaFotos.setViewMode(QListWidget.ViewMode.IconMode)
@@ -32,20 +91,16 @@ class MainWindow(QWidget):
 
         # --- Layouts ---
         main_layout = QVBoxLayout(self)
-        
         top_buttons_layout = QHBoxLayout()
         top_buttons_layout.addWidget(self.btnZip)
         top_buttons_layout.addWidget(self.btnClear)
         top_buttons_layout.addWidget(self.btnHist)
-
         h_layout = QHBoxLayout()
         h_layout.addWidget(self.lista, 2)
         h_layout.addWidget(self.listaFotos, 2)
-
         export_layout = QHBoxLayout()
         export_layout.addWidget(self.btnPptReport)
         export_layout.addWidget(self.btnXlsxReport)
-        
         main_layout.addLayout(top_buttons_layout)
         main_layout.addLayout(h_layout)
         main_layout.addLayout(export_layout)
@@ -54,51 +109,93 @@ class MainWindow(QWidget):
         self.btnZip.clicked.connect(self.on_cargar_zip)
         self.btnClear.clicked.connect(self.on_limpiar)
         self.btnHist.clicked.connect(self.on_cargar_hist)
-        self.btnPptReport.clicked.connect(self.on_generar_reporte_pptx)
-        self.btnXlsxReport.clicked.connect(self.on_generar_reporte_xlsx)
+        self.btnPptReport.clicked.connect(lambda: self.generar_informe('pptx'))
+        self.btnXlsxReport.clicked.connect(lambda: self.generar_informe('xlsx'))
         self.lista.currentItemChanged.connect(self.on_grupo_seleccionado)
 
-        # --- Estado inicial ---
-        self.on_limpiar() # Usamos on_limpiar para establecer el estado inicial
+        self.on_limpiar()
+
+    def set_ui_busy(self, busy, message=""):
+        self.btnZip.setEnabled(not busy)
+        self.btnClear.setEnabled(not busy)
+        self.btnHist.setEnabled(not busy)
+        self.btnPptReport.setEnabled(not busy)
+        self.btnXlsxReport.setEnabled(not busy)
+        self.setWindowTitle(f"InspectW Desktop {message}".strip())
 
     def on_limpiar(self):
-        """Limpia los datos cargados y la interfaz."""
-        self.grupos = {}
-        self.archivos = {}
-        self.hist_path = None
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self, "Aviso", "No se puede limpiar mientras se procesan archivos.")
+            return
+        self.grupos, self.archivos, self.hist_path = {}, {}, None
         self.lista.clear()
         self.listaFotos.clear()
 
     def on_cargar_zip(self):
+        if self.thread and self.thread.isRunning(): return
         paths, _ = QFileDialog.getOpenFileNames(self, "Selecciona uno o más archivos ZIP", "", "ZIP (*.zip)")
-        if not paths:
+        if not paths: return
+
+        self.set_ui_busy(True, "(Iniciando...)")
+        self.thread = QThread()
+        self.worker = ZipProcessorWorker(paths, self.hist_path)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.on_processing_finished)
+        self.worker.progress.connect(lambda msg: self.set_ui_busy(True, f"({msg})"))
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.finished.connect(self.clear_thread_references) # Limpiar referencia
+        self.thread.start()
+
+    def on_processing_finished(self, nuevos_grupos, nuevos_archivos, errors):
+        self.archivos.update(nuevos_archivos)
+        for key, grupo_nuevo in nuevos_grupos.items():
+            if key in self.grupos: self.grupos[key].fotos.extend(grupo_nuevo.fotos)
+            else: self.grupos[key] = grupo_nuevo
+        self.actualizar_lista_grupos()
+        self.set_ui_busy(False)
+        if errors:
+            QMessageBox.warning(self, "Errores Durante el Procesamiento", f"Se encontraron problemas:\n\n- {'\n- '.join(errors)}")
+
+    def generar_informe(self, report_type):
+        if not self.grupos: 
+            QMessageBox.warning(self, "Aviso", "Carga primero uno o más ZIPs.")
+            return
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self, "Aviso", "Espera a que termine el proceso actual.")
             return
 
-        error_mostrado = False
-        for path in paths:
-            nuevos_archivos = cargar_zip(path)
-            self.archivos.update(nuevos_archivos)
-            
-            nuevos_grupos, error = procesar_zip(nuevos_archivos, hist_path=self.hist_path)
-            
-            if error and not error_mostrado:
-                QMessageBox.warning(self, "Error al Cargar Histórico",
-                    f"No se pudieron aplicar las recomendaciones del archivo histórico. "
-                    f"El procesamiento del ZIP continuó, pero sin sugerencias.\n\n"
-                    f"Error: {error}\n\n"
-                    f"Asegúrate de que el archivo .csv tenga el formato correcto (separado por ';', codificación 'latin1' y columnas 'TAG' y 'RECOMENDACIÓN').")
-                error_mostrado = True # Mostrar el error solo una vez por tanda
+        ext, file_filter = ('pptx', "PowerPoint (*.pptx)") if report_type == 'pptx' else ('xlsx', "Excel (*.xlsx)")
+        destino, _ = QFileDialog.getSaveFileName(self, f"Guardar {ext.upper()}", "", file_filter)
+        if not destino: return
 
-            for key, grupo_nuevo in nuevos_grupos.items():
-                if key in self.grupos:
-                    self.grupos[key].fotos.extend(grupo_nuevo.fotos)
-                else:
-                    self.grupos[key] = grupo_nuevo
+        progress = QProgressDialog(f"Generando informe {ext.upper()}...", "Cancelar", 0, 100, self)
+        progress.setWindowModality(Qt.WindowModality.WindowModal)
         
-        self.actualizar_lista_grupos()
+        self.thread = QThread()
+        self.worker = ReportWorker(report_type, self.grupos, self.archivos, destino)
+        self.worker.moveToThread(self.thread)
+        self.worker.progress.connect(progress.setValue)
+        progress.canceled.connect(self.worker.stop)
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(progress.close)
+        self.worker.finished.connect(lambda msg: QMessageBox.information(self, "Proceso Terminado", msg))
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.finished.connect(self.clear_thread_references) # Limpiar referencia
+        
+        self.thread.start()
+        progress.exec()
+
+    def clear_thread_references(self):
+        """Slot para limpiar las referencias al worker y al thread cuando terminan."""
+        self.worker = None
+        self.thread = None
 
     def actualizar_lista_grupos(self):
-        """Refresca la lista de grupos en la UI con los datos actuales."""
         self.lista.clear()
         self.listaFotos.clear()
         for k, g in sorted(self.grupos.items()):
@@ -108,23 +205,13 @@ class MainWindow(QWidget):
 
     def on_grupo_seleccionado(self, current, previous):
         self.listaFotos.clear()
-        if not current:
-            return
-
+        if not current: return
         key = current.data(Qt.ItemDataRole.UserRole)
-        if key not in self.grupos:
-            return
-
+        if key not in self.grupos: return
         grupo = self.grupos[key]
-        
         for foto in grupo.fotos:
             path_in_zip = f"{foto.carpeta}/{foto.filename}"
-            img_data = self.archivos.get(path_in_zip)
-            
-            if img_data is None:
-                path_in_zip_alt = path_in_zip.replace('/', '\\')
-                img_data = self.archivos.get(path_in_zip_alt)
-
+            img_data = self.archivos.get(path_in_zip) or self.archivos.get(path_in_zip.replace('/','\\'))
             if img_data:
                 pixmap = QPixmap()
                 pixmap.loadFromData(img_data)
@@ -133,65 +220,28 @@ class MainWindow(QWidget):
                     item.setIcon(QIcon(pixmap))
                     self.listaFotos.addItem(item)
 
-    def on_generar_reporte_pptx(self):
-        if not self.grupos:
-            QMessageBox.warning(self, "Aviso", "Carga primero uno o más ZIPs.")
-            return
-        destino, _ = QFileDialog.getSaveFileName(self, "Guardar PPTX", "", "PowerPoint (*.pptx)")
-        if not destino: return
-        export_groups_to_pptx_report(self.grupos, self.archivos, destino)
-        QMessageBox.information(self, "Listo", f"Guardado en:\n{destino}")
-
-    def on_generar_reporte_xlsx(self):
-        if not self.grupos:
-            QMessageBox.warning(self, "Aviso", "Carga primero uno o más ZIPs.")
-            return
-            
-        destino, _ = QFileDialog.getSaveFileName(self, "Guardar XLSX", "", "Excel (*.xlsx)")
-        if not destino: 
-            return
-            
-        try:
-            with open(destino, 'a'): pass
-        except PermissionError:
-            QMessageBox.critical(self, "Error", 
-                "No se puede guardar el archivo porque está abierto en otro programa.\n"
-                "Cierra Excel u otro programa que pueda estar usando el archivo e intenta nuevamente.")
-            return
-        except Exception:
-            pass
-            
-        try:
-            export_groups_to_xlsx_report(self.grupos, self.archivos, destino)
-            QMessageBox.information(self, "Listo", f"Guardado en:\n{destino}")
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Ocurrió un error al guardar el archivo:\n{str(e)}")
-        
     def on_cargar_hist(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Selecciona historico.csv", "", "CSV (*.csv)")
-        if not path:
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self, "Aviso", "Espera a que termine el proceso actual.")
             return
-
+        path, _ = QFileDialog.getOpenFileName(self, "Selecciona historico.csv", "", "CSV (*.csv)")
+        if not path: return
         self.hist_path = path
-        QMessageBox.information(self, "Histórico Cargado", 
-            f"Se usará el archivo:\n{path}\n\n"
-            "Los próximos ZIPs que cargues usarán este histórico para las recomendaciones.")
-
+        QMessageBox.information(self, "Histórico Cargado", f"Se usará el archivo:\n{path}")
         if self.grupos:
-            reply = QMessageBox.question(self, 'Aplicar Histórico',
-                "Ya hay datos ZIP cargados. ¿Deseas aplicar las recomendaciones de este histórico a los datos existentes?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.Yes)
-            
+            reply = QMessageBox.question(self, 'Aplicar Histórico', "¿Deseas aplicar las recomendaciones a los datos ya cargados?",
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes)
             if reply == QMessageBox.StandardButton.Yes:
                 error = reaplicar_recomendaciones(self.grupos, self.hist_path)
-                if error:
-                    QMessageBox.critical(self, "Error al Aplicar Histórico",
-                        f"No se pudieron aplicar las recomendaciones.\n\n"
-                        f"Error: {error}\n\n"
-                        f"Asegúrate de que el archivo .csv tenga el formato correcto (separado por ';', codificación 'latin1' y columnas 'TAG' y 'RECOMENDACIÓN').")
-                else:
-                    QMessageBox.information(self, "Éxito", "Se han actualizado las recomendaciones para todos los grupos cargados.")
+                if error: QMessageBox.critical(self, "Error al Aplicar Histórico", f"No se pudieron aplicar las recomendaciones.\n\nError: {error}")
+                else: QMessageBox.information(self, "Éxito", "Se han actualizado las recomendaciones.")
+
+    def closeEvent(self, event):
+        if self.thread and self.thread.isRunning():
+            self.worker.stop()
+            self.thread.quit()
+            self.thread.wait(500)
+        event.accept()
 
 def main():
     app = QApplication(sys.argv)

@@ -20,7 +20,7 @@ def _add_textbox(slide, left, top, width, height, text, size=11):
     return tb
 
 def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, bytes],
-                                 output_pptx_path: str, max_px: int = 1600) -> None:
+                                 output_pptx_path: str, max_px: int = 1600, progress_callback=None) -> None:
     prs = Presentation()
     prs.slide_width = Inches(8.27)
     prs.slide_height = Inches(11.69)
@@ -39,6 +39,10 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
     photo_area_h = slide_h_in - margin_y_top - enumerated_h - margin_y_bottom
     cell_w = (slide_w_in - 2 * margin_x - (cols - 1) * spacing_x) / cols
     cell_h = (photo_area_h - (rows - 1) * spacing_y) / rows
+
+    # Calcular el número total de diapositivas para el progreso
+    total_slides = sum(math.ceil(len(g.fotos) / (cols * rows)) for g in grupos.values() if g.fotos)
+    slides_done = 0
 
     for gname, grupo in grupos.items():
         per_slide = cols * rows
@@ -206,5 +210,11 @@ def export_groups_to_pptx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
             p.text = rec_text
             if p.runs:
                 p.runs[0].font.size = Pt(10)
+            
+            slides_done += 1
+            if progress_callback:
+                progress_percentage = int((slides_done / total_slides) * 100) if total_slides > 0 else 0
+                progress_callback.emit(progress_percentage)
 
     prs.save(output_pptx_path)
+
