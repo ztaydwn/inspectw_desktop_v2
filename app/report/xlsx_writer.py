@@ -218,10 +218,10 @@ def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
         rec_content_cell.border = thin_border
 
         # Adjust column widths
-        ws.column_dimensions['A'].width = 25
-        ws.column_dimensions['B'].width = 25
-        ws.column_dimensions['C'].width = 25
-        ws.column_dimensions['D'].width = 25
+        ws.column_dimensions['A'].width = 21
+        ws.column_dimensions['B'].width = 21
+        ws.column_dimensions['C'].width = 21
+        ws.column_dimensions['D'].width = 21
 
         if progress_callback:
             progress_percentage = int(((idx + 1) / total_grupos) * 100)
