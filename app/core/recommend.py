@@ -16,13 +16,9 @@ def _tokens(s:str)->List[str]:
 
 @dataclass
 class RecConfig:
-    w_jaccard: float = 0.65
-    w_diff: float = 0.35
-    min_score: float = 0.18
+    min_score: float = 0.10
     top_k: int = 3
     stopwords: set[str] = None
-    tag_weight: float = 0.7   # peso del campo TAG
-    obs_weight: float = 0.3   # peso del campo OBSERVACION
     keyword_boost: Dict[str,float] = None  # {"fisura":0.05,"humedad":0.04}
 
 class RecommendationEngine:
@@ -59,38 +55,69 @@ class RecommendationEngine:
         if top_k is None: top_k=cfg.top_k
         if min_score is None: min_score=cfg.min_score
 
-        q = f"{query} {extra_text}".strip()
-        q_tokens = set(_tokens(q))
+        q_tokens_for_tag = set(_tokens(query))
         if cfg.stopwords:
-            q_tokens={t for t in q_tokens if t not in cfg.stopwords}
+            q_tokens_for_tag={t for t in q_tokens_for_tag if t not in cfg.stopwords}
 
-        out=[]
+        # Step 1: Find the best matching TAG
+        best_tag_score = -1.0
+        best_tag = ""
+        
+        unique_tags = {row["tag"]: row["tok_tag"] for row in self.rows}
+
+        for tag, tok_tag in unique_tags.items():
+            diff = SequenceMatcher(None, _norm(query), _norm(tag)).ratio()
+            
+            inter_tag = len(q_tokens_for_tag & tok_tag)
+            union_tag = len(q_tokens_for_tag | tok_tag) or 1
+            j_tag = inter_tag / union_tag
+            
+            tag_score = 0.7 * diff + 0.3 * j_tag
+            
+            if tag_score > best_tag_score:
+                best_tag_score = tag_score
+                best_tag = tag
+
+        TAG_MATCH_THRESHOLD = 0.35 
+        if best_tag_score < TAG_MATCH_THRESHOLD:
+            return []
+
+        # Step 2: Rank recommendations within the selected TAG group
+        q_tokens_for_obs = set(_tokens(f"{query} {extra_text}".strip()))
+        if cfg.stopwords:
+            q_tokens_for_obs={t for t in q_tokens_for_obs if t not in cfg.stopwords}
+            
+        out = []
         for row in self.rows:
-            # Jaccard ponderado por campo
-            inter_tag=len(q_tokens & row["tok_tag"])
-            union_tag=len(q_tokens | row["tok_tag"]) or 1
-            j_tag=inter_tag/union_tag
+            if row["tag"] == best_tag:
+                if not row["obs"]:
+                    score = 0.1
+                else:
+                    inter_obs = len(q_tokens_for_obs & row["tok_obs"])
+                    union_obs = len(q_tokens_for_obs | row["tok_obs"]) or 1
+                    j_obs = inter_obs / union_obs
 
-            inter_obs=len(q_tokens & row["tok_obs"])
-            union_obs=len(q_tokens | row["tok_obs"]) or 1
-            j_obs=inter_obs/union_obs
+                    obs_text_for_diff = extra_text if extra_text else query
+                    diff_obs = SequenceMatcher(None, _norm(obs_text_for_diff), _norm(row["obs"])).ratio()
 
-            jaccard = cfg.tag_weight*j_tag + cfg.obs_weight*j_obs
+                    score = 0.6 * j_obs + 0.4 * diff_obs
 
-            # difflib sobre TAG principal
-            diff = SequenceMatcher(None, _norm(query), _norm(row["tag"])).ratio()
+                if cfg.keyword_boost:
+                    for kw, bonus in cfg.keyword_boost.items():
+                        if kw in q_tokens_for_obs:
+                            score += bonus
+                
+                if row["rec"] and score >= min_score:
+                    out.append((score, row["rec"]))
 
-            score = cfg.w_jaccard*jaccard + cfg.w_diff*diff
+        seen_recs = {}
+        for score, rec in sorted(out, key=lambda x: x[0], reverse=True):
+            if rec not in seen_recs:
+                seen_recs[rec] = score
+                
+        final_recs = sorted(seen_recs.items(), key=lambda item: item[1], reverse=True)
 
-            # boosts por palabra clave
-            if cfg.keyword_boost:
-                for kw,bonus in cfg.keyword_boost.items():
-                    if kw in q_tokens: score += bonus
-
-            out.append((score, row["rec"]))
-
-        out.sort(key=lambda x: x[0], reverse=True)
-        return [(s, r) for s, r in out[:top_k] if s >= min_score]
+        return [(s, r) for r, s in final_recs[:top_k]]
 
 def load_engine(csv_path:str, cfg:RecConfig=RecConfig())->RecommendationEngine:
     df = pd.read_csv(csv_path, sep=";", encoding="latin1")
