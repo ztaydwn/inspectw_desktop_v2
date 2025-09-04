@@ -194,11 +194,11 @@ def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
         rec_text = "\n".join(f"• {r}" for r in recs) if recs else "—"
         
         # --- Nueva Lógica de Cálculo de Altura ---
-        chars_per_line = 75
+        chars_per_line = 70
         details_lines_visual = estimate_visual_lines(details_text, chars_per_line)
         rec_lines_visual = estimate_visual_lines(rec_text, chars_per_line)
         
-        needed_rows = max(6, max(details_lines_visual, rec_lines_visual))
+        needed_rows = max(8, max(details_lines_visual, rec_lines_visual))
         
         details_content_cell = ws[f'A{current_row}']
         ws.merge_cells(start_row=current_row, start_column=1, end_row=current_row + needed_rows - 1, end_column=2)
@@ -209,7 +209,7 @@ def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
         apply_border_to_range(ws, f'C{current_row}', f'D{current_row + needed_rows - 1}')
         
         for i in range(needed_rows):
-            ws.row_dimensions[current_row + i].height = 15
+            ws.row_dimensions[current_row + i].height = 16
 
         set_cell_style(details_content_cell, details_text, size=10, alignment=Alignment(wrap_text=True, vertical='top'))
         details_content_cell.border = thin_border
@@ -218,10 +218,10 @@ def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, b
         rec_content_cell.border = thin_border
 
         # Adjust column widths
-        ws.column_dimensions['A'].width = 21
-        ws.column_dimensions['B'].width = 21
-        ws.column_dimensions['C'].width = 21
-        ws.column_dimensions['D'].width = 21
+        ws.column_dimensions['A'].width = 23
+        ws.column_dimensions['B'].width = 23
+        ws.column_dimensions['C'].width = 23
+        ws.column_dimensions['D'].width = 23
 
         if progress_callback:
             progress_percentage = int(((idx + 1) / total_grupos) * 100)
