@@ -1,15 +1,434 @@
 from openpyxl import Workbook
+from openpyxl.drawing.image import Image as OpenpyxlImage
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
 import openpyxl.drawing.image
-from openpyxl.drawing.spreadsheet_drawing import OneCellAnchor, AnchorMarker
+from openpyxl.drawing.spreadsheet_drawing import OneCellAnchor
+from openpyxl.drawing.xdr import XDRPositiveSize2D
 from openpyxl.utils.units import pixels_to_EMU
 from typing import Dict
 from app.core.processing import Grupo
 from app.utils.nlg_utils import agrupa_y_redacta
 from PIL import Image, ImageOps
 import io, math, os, re
+
+def read_project_info(path: str) -> Dict[str, str]:
+    """Lee pares clave:valor desde ``path`` y los retorna en un diccionario.
+    El archivo es opcional; si no existe se devuelve un diccionario vacío
+    para que el proceso continúe sin errores.
+    """
+    info: Dict[str, str] = {}
+    if not path:
+        return info
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                if ":" in line:
+                    key, value = line.split(":", 1)
+                    info[key.strip().lower()] = value.strip()
+    except FileNotFoundError:
+        pass
+    return info
+def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> None:
+    """Agrega hojas iniciales independientes al ``Workbook``.
+    Los valores se obtienen del archivo ``infoproyect.txt`` con formato
+    ``clave: valor`` por línea. Si el archivo no existe, las celdas quedarán
+    vacías y el resto del proceso no se verá afectado.
+    """
+    info = read_project_info(info_path)
+    # Preparar estilos locales (bordes y rellenos) para evitar referencias a
+    # variables externas como `gray_fill` o `thin_border` que sólo existen en
+    # otros contextos. Estos se usan para tablas en la hoja de desarrollo.
+    gray_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+
+    # --------------------------------------------------------------------------
+    # Hoja de portada
+    # --------------------------------------------------------------------------
+    # La portada se diseña como una plantilla con un aspecto similar al modelo
+    # proporcionado. Se definen anchos de columna amplios, alturas de fila y
+    # combinaciones de celdas para lograr una disposición agradable. Las celdas
+    # usadas se rellenan con un tono gris claro para simular el fondo del
+    # informe.
+    portada = wb.create_sheet(title="PORTADA", index=0)
+    # Definir el ancho de las columnas (A–H) para dar un margen amplio en A4
+    for col in ["A", "B", "C", "D", "E", "F", "G", "H"]:
+        portada.column_dimensions[col].width = 11
+    # Colocar un color de fondo claro en el área de trabajo
+    light_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
+    for row in range(1, 22):
+        for col_idx in range(1, 5):
+            cell = portada.cell(row=row, column=col_idx)
+            cell.fill = light_fill
+    
+    portada.row_dimensions[1].height = 30
+    portada.row_dimensions[2].height = 30
+    portada.row_dimensions[3].height = 30
+
+        # Insertar logo (fila 1–3)
+    if logo_path:
+        logo_img = OpenpyxlImage(logo_path)
+        logo_img.width = 160  # Ajusta según necesidades
+        logo_img.height = 100
+        
+        # --- Centrar logo en el área A1:D3 ---
+        # 1. Calcular dimensiones del área en píxeles
+        # Ancho (aprox): (caracteres * 7) + 5
+        total_width_px = sum([(portada.column_dimensions[c].width * 7) + 5 for c in ["A", "B", "C", "D", "E","F"]])
+        # Alto: puntos * 4/3
+        total_height_px = sum([portada.row_dimensions[r].height * 4/3 for r in [1, 2, 3]])
+
+        # 2. Calcular offset para centrar
+        x_offset_px = max(0, (total_width_px - logo_img.width) / 2)
+        y_offset_px = max(0, (total_height_px - logo_img.height) / 2)
+
+        # 3. Convertir a EMUs y crear ancla
+        anchor = OneCellAnchor()
+        anchor._from.col = 0
+        anchor._from.row = 0
+        anchor._from.colOff = pixels_to_EMU(x_offset_px)
+        anchor._from.rowOff = pixels_to_EMU(y_offset_px)
+        
+        width_emu = pixels_to_EMU(logo_img.width)
+        height_emu = pixels_to_EMU(logo_img.height)
+        anchor.ext = XDRPositiveSize2D(width_emu, height_emu)
+
+        logo_img.anchor = anchor
+        
+        portada.add_image(logo_img)
+        
+    # Espacio reservado para el logo en las filas 1‑3
+    portada.merge_cells("A1:D3")
+    logo_cell = portada["A1"]
+    set_cell_style(
+        logo_cell,
+        "",  # Dejar sin texto; se podría insertar una imagen aquí si estuviera disponible
+        alignment=Alignment(horizontal="center", vertical="center")
+    )
+    # Título principal del informe en filas 5‑6
+    portada.merge_cells("A5:D6")
+    title_cell = portada["A5"]
+    set_cell_style(
+        title_cell,
+        "INFORME DE SIMULACRO DE INSPECCIÓN DE DEFENSA CIVIL EN EDIFICACIONES",
+        bold=True,
+        size=14,
+        alignment=Alignment(horizontal="center", vertical="center", wrap_text=True)
+    )
+    portada.row_dimensions[5].height = 45
+    portada.row_dimensions[6].height = 45
+    # Datos del proyecto: etiquetas y valores
+    detail_rows = [
+        ("NOMBRE DEL ESTABLECIMIENTO:", info.get("nombre", "")),
+        ("PROPIETARIO:", info.get("propietario", "")),
+        ("DIRECCIÓN:", info.get("direccion", "")),
+    ]
+    start_row = 9
+    for label, value in detail_rows:
+        # Etiqueta en columnas B-C, alineada a la derecha
+        portada.merge_cells(start_row=start_row, start_column=2, end_row=start_row, end_column=3)
+        cell_label = portada.cell(row=start_row, column=2)
+        set_cell_style(
+            cell_label,
+            label,
+            bold=True,
+            alignment=Alignment(horizontal="right", vertical="center")
+        )
+        # Valor en columnas D-E, alineado a la izquierda
+        portada.merge_cells(start_row=start_row, start_column=4, end_row=start_row, end_column=5)
+        cell_val = portada.cell(row=start_row, column=4)
+        set_cell_style(
+            cell_val,
+            value,
+            alignment=Alignment(horizontal="left", vertical="center")
+        )
+        # Ajustar altura de fila
+        portada.row_dimensions[start_row].height = 25
+        start_row += 2
+    # Texto al pie de página con la ubicación y año (p. ej. LIMA‑2025)
+    footer_row = 19
+    portada.merge_cells(start_row=footer_row, start_column=1, end_row=footer_row, end_column=4)
+    footer_cell = portada.cell(row=footer_row, column=1)
+    set_cell_style(
+        footer_cell,
+        "LIMA-2025",
+        bold=False,
+        size=12,
+        alignment=Alignment(horizontal="center", vertical="center")
+    )
+    portada.row_dimensions[footer_row].height = 30
+
+    # --------------------------------------------------------------------------
+    # Hoja de datos generales
+    # --------------------------------------------------------------------------
+    # Esta hoja reproduce la segunda página del informe donde se consignan los
+    # datos básicos de la inspección y antecedentes. Se organizan los textos en
+    # filas numeradas de acuerdo al formato.
+    datos = wb.create_sheet(title="DATOS GENERALES", index=1)
+    # Definir anchos de columna
+    datos.column_dimensions["A"].width = 28
+    datos.column_dimensions["B"].width = 45
+    datos.column_dimensions["C"].width = 5
+    datos.column_dimensions["D"].width = 5
+    # Encabezado principal
+    datos.merge_cells("A1:D1")
+    header_cell = datos["A1"]
+    set_cell_style(
+        header_cell,
+        "INFORME DE INSPECCIÓN SIMULACRO",
+        bold=True,
+        size=14,
+        alignment=Alignment(horizontal="center", vertical="center")
+    )
+    datos.row_dimensions[1].height = 35
+    # Sección 1: Datos generales
+    datos.merge_cells("A3:D3")
+    set_cell_style(
+        datos["A3"],
+        "1. DATOS GENERALES",
+        bold=True,
+        size=12,
+        alignment=Alignment(horizontal="left", vertical="center")
+    )
+    datos.row_dimensions[3].height = 25
+    # Fila por cada subapartado
+    sec1 = [
+        ("1.1 PROPIETARIO:", info.get("propietario", "")),
+        ("1.2 NOMBRE DE ESTABLECIMIENTO INSPECCIONADO:", info.get("nombre", "")),
+        ("1.3 DIRECCIÓN DE LOCAL INSPECCIONADO:", info.get("direccion", "")),
+        ("1.4 DÍA DE LA INSPECCIÓN:", ""),
+        ("1.5 ESPECIALIDAD:", ""),
+        ("1.6 PROFESIONALES DESIGNADOS:", ""),
+        ("1.7 PERSONAL DE ACOMPAÑAMIENTO INNOVA:", ""),
+        ("1.8 COMENTARIOS DEL PROCESO DE INSPECCIÓN:", ""),
+    ]
+    row_ptr = 4
+    for label, value in sec1:
+        # Etiqueta
+        datos[f"A{row_ptr}"].value = label
+        datos[f"A{row_ptr}"].font = Font(bold=True, size=10)
+        datos[f"A{row_ptr}"].alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+        # Para campos que pueden ocupar varias líneas, se fusionan varias filas
+        if label.startswith("1.6") or label.startswith("1.7") or label.startswith("1.8"):
+            # Reservar dos filas para estos campos
+            datos.merge_cells(start_row=row_ptr, start_column=2, end_row=row_ptr + 1, end_column=4)
+            cell_val = datos.cell(row=row_ptr, column=2)
+            set_cell_style(
+                cell_val,
+                value,
+                alignment=Alignment(horizontal="left", vertical="top", wrap_text=True)
+            )
+            datos.row_dimensions[row_ptr].height = 30
+            datos.row_dimensions[row_ptr + 1].height = 30
+            row_ptr += 2
+        else:
+            datos.merge_cells(start_row=row_ptr, start_column=2, end_row=row_ptr, end_column=4)
+            cell_val = datos.cell(row=row_ptr, column=2)
+            set_cell_style(
+                cell_val,
+                value,
+                alignment=Alignment(horizontal="left", vertical="top", wrap_text=True)
+            )
+            datos.row_dimensions[row_ptr].height = 20
+            row_ptr += 1
+    # Sección 2: Antecedentes
+    datos.merge_cells(start_row=row_ptr, start_column=1, end_row=row_ptr, end_column=4)
+    set_cell_style(
+        datos.cell(row=row_ptr, column=1),
+        "2. ANTECEDENTES",
+        bold=True,
+        size=12,
+        alignment=Alignment(horizontal="left", vertical="center")
+    )
+    datos.row_dimensions[row_ptr].height = 25
+    row_ptr += 1
+    # Subapartados de antecedentes
+    antecedentes = [
+        ("2.1 FUNCIÓN DEL ESTABLECIMIENTO:", ""),
+        ("2.2 ÁREA OCUPADA:", ""),
+        ("2.3 CANTIDAD DE PISOS:", ""),
+        ("2.4 RIESGO:", ""),
+        ("2.5 SITUACIÓN FORMAL:", ""),
+    ]
+    for label, value in antecedentes:
+        datos[f"A{row_ptr}"].value = label
+        datos[f"A{row_ptr}"].font = Font(bold=True, size=10)
+        datos[f"A{row_ptr}"].alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+        # Fusionar celdas para el valor
+        datos.merge_cells(start_row=row_ptr, start_column=2, end_row=row_ptr, end_column=4)
+        set_cell_style(
+            datos.cell(row=row_ptr, column=2),
+            value,
+            alignment=Alignment(horizontal="left", vertical="top", wrap_text=True)
+        )
+        datos.row_dimensions[row_ptr].height = 20
+        row_ptr += 1
+
+    # --------------------------------------------------------------------------
+    # Hoja de desarrollo del simulacro
+    # --------------------------------------------------------------------------
+    # Esta hoja reproduce el desglose de la visita técnica y las observaciones.
+    desarrollo = wb.create_sheet(title="DESARROLLO", index=2)
+    desarrollo.column_dimensions["A"].width = 50
+    desarrollo.column_dimensions["B"].width = 15
+    desarrollo.column_dimensions["C"].width = 10
+    desarrollo.column_dimensions["D"].width = 15
+    # Encabezado principal de la sección 3
+    desarrollo.merge_cells("A1:D1")
+    set_cell_style(
+        desarrollo["A1"],
+        "3. DESARROLLO DEL SIMULACRO:",
+        bold=True,
+        size=12,
+        alignment=Alignment(horizontal="left", vertical="center")
+    )
+    desarrollo.row_dimensions[1].height = 25
+    # Párrafo descriptivo
+    desarrollo.merge_cells("A2:D3")
+    descriptive_text = (
+        "Se programó una visita técnica al local en referencia, donde participaron los profesionales designados. "
+        "Se realizó el recorrido por todas las instalaciones, anotando las observaciones en el acta del anexo 7A, "
+        "aprobado por Reglamento de Inspecciones Técnicas de Seguridad en Edificaciones (D.S. 002-2018-PCM)."
+    )
+    set_cell_style(
+        desarrollo["A2"],
+        descriptive_text,
+        size=10,
+        alignment=Alignment(horizontal="justify", vertical="top", wrap_text=True)
+    )
+    desarrollo.row_dimensions[2].height = 40
+    desarrollo.row_dimensions[3].height = 40
+    # Observaciones especiales
+    desarrollo["A5"].value = "Observaciones especiales:"
+    desarrollo["A5"].font = Font(bold=True, size=10)
+    desarrollo["A5"].alignment = Alignment(horizontal="left", vertical="center")
+    # Área para observaciones (filas 5‑7, columnas B‑D)
+    desarrollo.merge_cells(start_row=5, start_column=2, end_row=7, end_column=4)
+    obs_cell = desarrollo.cell(row=5, column=2)
+    obs_cell.border = thin_border
+    obs_cell.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+    obs_cell.value = ""  # área en blanco para completar
+    desarrollo.row_dimensions[5].height = 25
+    desarrollo.row_dimensions[6].height = 25
+    desarrollo.row_dimensions[7].height = 25
+    # Tabla de condiciones sobre la edificación
+    start_table_row = 9
+    # Título de la tabla
+    desarrollo.merge_cells(start_row=start_table_row, start_column=1, end_row=start_table_row, end_column=4)
+    set_cell_style(
+        desarrollo.cell(row=start_table_row, column=1),
+        "SOBRE LA EDIFICACIÓN:",
+        bold=True,
+        size=10,
+        fill=gray_fill,
+        border=thin_border,
+        alignment=Alignment(horizontal="left", vertical="center")
+    )
+    desarrollo.row_dimensions[start_table_row].height = 20
+    # Fila de encabezados de la tabla (después del título)
+    header_row = start_table_row + 1
+    # Primera columna: descripción general con varias líneas
+    desarrollo.merge_cells(start_row=header_row, start_column=1, end_row=header_row, end_column=2)
+    set_cell_style(
+        desarrollo.cell(row=header_row, column=1),
+        "CONDICIÓN DE SEGURIDAD OBSERVADA\n(Según tabla de D.S. 007-2018-PCM – Anexo 7A)",
+        bold=True,
+        size=9,
+        fill=gray_fill,
+        border=thin_border,
+        alignment=Alignment(horizontal="center", vertical="center", wrap_text=True)
+    )
+    # Segunda columna: Sí / No
+    set_cell_style(
+        desarrollo.cell(row=header_row, column=3),
+        "Sí / No",
+        bold=True,
+        size=9,
+        fill=gray_fill,
+        border=thin_border,
+        alignment=Alignment(horizontal="center", vertical="center", wrap_text=True)
+    )
+    # Tercera columna: No corresponde
+    set_cell_style(
+        desarrollo.cell(row=header_row, column=4),
+        "No corresponde",
+        bold=True,
+        size=9,
+        fill=gray_fill,
+        border=thin_border,
+        alignment=Alignment(horizontal="center", vertical="center", wrap_text=True)
+    )
+    desarrollo.row_dimensions[header_row].height = 25
+    # Detalle de cada condición (filas 11‑14)
+    condiciones = [
+        (
+            "1. No se encuentra en proceso de construcción según lo establecido en el artículo único de la Norma G.040 "
+            "Definiciones del Reglamento Nacional de Edificaciones",
+            "SI",
+            ""
+        ),
+        (
+            "2. Cuenta con servicios de agua, electricidad, y los que resulten esenciales para el desarrollo de sus "
+            "actividades, debidamente instalados e implementados.",
+            "SI",
+            ""
+        ),
+        (
+            "3. Cuenta con mobiliario básico e instalado para el desarrollo de la actividad.",
+            "SI",
+            ""
+        ),
+        (
+            "4. Tiene los equipos o artefactos debidamente instalados o ubicados, respectivamente, en los lugares de uso "
+            "habitual o permanente.",
+            "SI",
+            ""
+        ),
+    ]
+    current = header_row + 1
+    for descripcion, si_no, no_corresponde in condiciones:
+        # Descripción ocupa columnas A–B
+        desarrollo.merge_cells(start_row=current, start_column=1, end_row=current, end_column=2)
+        set_cell_style(
+            desarrollo.cell(row=current, column=1),
+            descripcion,
+            size=9,
+            border=thin_border,
+            alignment=Alignment(horizontal="left", vertical="top", wrap_text=True)
+        )
+        # Columna Sí/No
+        set_cell_style(
+            desarrollo.cell(row=current, column=3),
+            si_no,
+            size=9,
+            border=thin_border,
+            alignment=Alignment(horizontal="center", vertical="center")
+        )
+        # Columna No corresponde
+        set_cell_style(
+            desarrollo.cell(row=current, column=4),
+            no_corresponde,
+            size=9,
+            border=thin_border,
+            alignment=Alignment(horizontal="center", vertical="center")
+        )
+        desarrollo.row_dimensions[current].height = 35
+        current += 1
+    # Comentarios adicionales
+    comentarios_row = current + 1
+    desarrollo[f"A{comentarios_row}"] = "Comentarios adicionales al respecto:"
+    desarrollo[f"A{comentarios_row}"].font = Font(bold=True, size=10)
+    desarrollo[f"A{comentarios_row}"].alignment = Alignment(horizontal="left", vertical="center")
+    # Área para comentarios (celdas B–D varias filas)
+    desarrollo.merge_cells(start_row=comentarios_row, start_column=2, end_row=comentarios_row + 2, end_column=4)
+    comentarios_cell = desarrollo.cell(row=comentarios_row, column=2)
+    comentarios_cell.border = thin_border
+    comentarios_cell.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+    comentarios_cell.value = ""
+    desarrollo.row_dimensions[comentarios_row].height = 25
+    desarrollo.row_dimensions[comentarios_row + 1].height = 25
+    desarrollo.row_dimensions[comentarios_row + 2].height = 25
 
 def natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s[0])]
@@ -53,9 +472,18 @@ def estimate_visual_lines(text: str, chars_per_line: int) -> int:
         total_lines += math.ceil(len(line_segment) / chars_per_line) if line_segment else 1
     return total_lines
 
-def export_groups_to_xlsx_report(grupos: Dict[str, Grupo], archivos: Dict[str, bytes], output_xlsx_path: str, progress_callback=None) -> None:
+def export_groups_to_xlsx_report(
+    grupos: Dict[str, Grupo],
+    archivos: Dict[str, bytes],
+    output_xlsx_path: str,
+    progress_callback=None,
+    info_path: str = os.path.join("datos", "infoproyect.txt"),
+    ) -> None:
     wb = Workbook()
-    wb.remove(wb.active) # Remove default sheet
+    wb.remove(wb.active)  # Remove default sheet
+
+    # Agregar hojas independientes iniciales
+    add_intro_sheets(wb, info_path, logo_path="datos/portadat.png")
 
     # Define styles
     header_font = Font(bold=True, size=12)
