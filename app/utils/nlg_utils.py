@@ -115,21 +115,17 @@ def agrupar_descripciones(
 def _seleccionar_plantilla(descripcion: str) -> str:
     """Devuelve una plantilla de oración según la descripción.
 
-    Se examina la descripción en busca de ciertas palabras clave. Si
-    la palabra clave ``"fisura"`` (ignorando mayúsculas/minúsculas)
-    está presente, se utiliza la plantilla::
+    Anteriormente, esta función seleccionaba diferentes plantillas
+    basadas en palabras clave. Ahora, para cumplir con el requisito
+    de un formato consistente, siempre devuelve la misma plantilla:
 
-        "Se encontró {descripcion} en {variables}"
+    .. code-block:: text
 
-    Si aparece ``"ig"`` como palabra independiente o prefijo, se
-    utiliza la plantilla::
+        "{descripcion} en {variables}"
 
-        "En {variables}, {descripcion}"
-
-    Si ninguna palabra clave coincide, se retorna la plantilla
-    predeterminada::
-
-        "Se encontró {descripcion} en {variables}"
+    Esto asegura que todas las oraciones generadas sigan la
+    estructura de "descripción" seguida de "en" y las "variables"
+    asociadas.
 
     Args:
         descripcion: Cadena de descripción representativa del grupo.
@@ -138,16 +134,8 @@ def _seleccionar_plantilla(descripcion: str) -> str:
         Una cadena de plantilla con los marcadores ``{descripcion}``
         y ``{variables}`` listos para formatear.
     """
-    desc_norm = _normaliza_descripcion(descripcion)
-    # Comprobamos palabras clave. Utilizamos ' in ' para evitar
-    # coincidencias parciales (por ejemplo, "fig" no debe coincidir con "ig").
-    if "fisura" in desc_norm:
-        return "Se encontró {descripcion} en {variables}"
-    # Comprobar si 'ig' aparece como palabra independiente o seguida de ':'
-    # Eliminamos acentos y símbolos para robustez.
-    if desc_norm.startswith("ig ") or desc_norm.startswith("ig:") or " ig " in desc_norm:
-        return "En {variables}, {descripcion}"
-    return "Se encontró {descripcion} en {variables}"
+    # Se unifica la plantilla para seguir siempre el formato "descripción en variables".
+    return "{descripcion} en {variables}"
 
 
 def _formatear_variables(variables: List[str]) -> str:
@@ -195,7 +183,12 @@ def redactar_oracion(grupo: Dict[str, List[str]]) -> str:
     variables = grupo["variables"]
     plantilla = _seleccionar_plantilla(descripcion)
     vars_formateadas = _formatear_variables(variables)
-    return plantilla.format(descripcion=descripcion, variables=vars_formateadas)
+    oracion = plantilla.format(descripcion=descripcion, variables=vars_formateadas)
+
+    # Capitalizar solo la primera letra de la oración resultante.
+    if oracion:
+        return oracion[0].upper() + oracion[1:]
+    return ""
 
 
 def agrupa_y_redacta(
