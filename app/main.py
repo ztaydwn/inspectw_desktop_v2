@@ -5,27 +5,36 @@ from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
                              QMessageBox, QProgressDialog)
 from PyQt6.QtGui import QPixmap, QIcon
 from PyQt6.QtCore import QSize, Qt, QObject, QThread, pyqtSignal
-from app.core.processing import cargar_zip, procesar_zip, reaplicar_recomendaciones
+from app.core.processing import (cargar_zip, procesar_zip, reaplicar_recomendaciones, _find_image_data,
+                                 cargar_directorio)
 from app.report.pptx_writer import export_groups_to_pptx_report
 from app.report.xlsx_writer import export_groups_to_xlsx_report
 
-class ZipProcessorWorker(QObject):
+class DataProcessorWorker(QObject):
     finished = pyqtSignal(dict, dict, list)
     progress = pyqtSignal(str)
 
-    def __init__(self, paths, hist_path):
+    def __init__(self, paths, hist_path, mode='zip'):
         super().__init__()
         self.paths = paths
         self.hist_path = hist_path
+        self.mode = mode
         self._is_running = True
 
     def run(self):
         grupos_acumulados, archivos_acumulados, errors = {}, {}, []
+        
+        loader_func = cargar_zip if self.mode == 'zip' else cargar_directorio
+
         for i, path in enumerate(self.paths):
             if not self._is_running: break
             try:
-                self.progress.emit(f"Procesando {i+1}/{len(self.paths)}: {os.path.basename(path)}...")
-                nuevos_archivos = cargar_zip(path)
+                base_name = os.path.basename(path)
+                self.progress.emit(f"Procesando {i+1}/{len(self.paths)}: {base_name}...")
+                
+                # Usar la función de carga correspondiente
+                nuevos_archivos = loader_func(path)
+
                 archivos_acumulados.update(nuevos_archivos)
                 nuevos_grupos, error = procesar_zip(nuevos_archivos, hist_path=self.hist_path)
                 if error: errors.append(f"Error en {os.path.basename(path)}: {error}")
@@ -33,7 +42,7 @@ class ZipProcessorWorker(QObject):
                     if key in grupos_acumulados: grupos_acumulados[key].fotos.extend(grupo_nuevo.fotos)
                     else: grupos_acumulados[key] = grupo_nuevo
             except Exception as e:
-                errors.append(f"Error crítico procesando {os.path.basename(path)}: {e}")
+                errors.append(f"Error crítico procesando {base_name}: {e}")
         self.finished.emit(grupos_acumulados, archivos_acumulados, errors)
 
     def stop(self): self._is_running = False
@@ -78,6 +87,7 @@ class MainWindow(QWidget):
 
         # --- Widgets ---
         self.btnZip = QPushButton("Cargar ZIP(s)")
+        self.btnDir = QPushButton("Cargar Carpeta")
         self.btnClear = QPushButton("Limpiar")
         self.btnPptReport = QPushButton("Generar Informe A4 (PPTX)")
         self.btnXlsxReport = QPushButton("Generar Informe (XLSX)")
@@ -93,6 +103,7 @@ class MainWindow(QWidget):
         main_layout = QVBoxLayout(self)
         top_buttons_layout = QHBoxLayout()
         top_buttons_layout.addWidget(self.btnZip)
+        top_buttons_layout.addWidget(self.btnDir)
         top_buttons_layout.addWidget(self.btnClear)
         top_buttons_layout.addWidget(self.btnHist)
         h_layout = QHBoxLayout()
@@ -107,6 +118,7 @@ class MainWindow(QWidget):
 
         # --- Conexiones ---
         self.btnZip.clicked.connect(self.on_cargar_zip)
+        self.btnDir.clicked.connect(self.on_cargar_carpeta)
         self.btnClear.clicked.connect(self.on_limpiar)
         self.btnHist.clicked.connect(self.on_cargar_hist)
         self.btnPptReport.clicked.connect(lambda: self.generar_informe('pptx'))
@@ -117,6 +129,7 @@ class MainWindow(QWidget):
 
     def set_ui_busy(self, busy, message=""):
         self.btnZip.setEnabled(not busy)
+        self.btnDir.setEnabled(not busy)
         self.btnClear.setEnabled(not busy)
         self.btnHist.setEnabled(not busy)
         self.btnPptReport.setEnabled(not busy)
@@ -136,9 +149,24 @@ class MainWindow(QWidget):
         paths, _ = QFileDialog.getOpenFileNames(self, "Selecciona uno o más archivos ZIP", "", "ZIP (*.zip)")
         if not paths: return
 
+        self.iniciar_procesamiento(paths, mode='zip')
+
+    def on_cargar_carpeta(self):
+        if self.thread and self.thread.isRunning(): return
+        path = QFileDialog.getExistingDirectory(self, "Selecciona la carpeta del proyecto")
+        if not path: return
+
+        # Verificar que los archivos necesarios existen
+        if not os.path.exists(os.path.join(path, "descriptions.txt")) or not os.path.exists(os.path.join(path, "grupos.txt")):
+            QMessageBox.warning(self, "Archivos Faltantes", "La carpeta seleccionada debe contener 'descriptions.txt' y 'grupos.txt'.")
+            return
+
+        self.iniciar_procesamiento([path], mode='dir')
+
+    def iniciar_procesamiento(self, paths, mode):
         self.set_ui_busy(True, "(Iniciando...)")
         self.thread = QThread()
-        self.worker = ZipProcessorWorker(paths, self.hist_path)
+        self.worker = DataProcessorWorker(paths, self.hist_path, mode=mode)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.on_processing_finished)
@@ -210,8 +238,7 @@ class MainWindow(QWidget):
         if key not in self.grupos: return
         grupo = self.grupos[key]
         for foto in grupo.fotos:
-            path_in_zip = f"{foto.carpeta}/{foto.filename}"
-            img_data = self.archivos.get(path_in_zip) or self.archivos.get(path_in_zip.replace('/','\\'))
+            img_data = _find_image_data(self.archivos, foto)
             if img_data:
                 pixmap = QPixmap()
                 pixmap.loadFromData(img_data)

@@ -4,8 +4,8 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.utils.cell import coordinate_from_string, column_index_from_string
 import openpyxl.drawing.image
-from openpyxl.drawing.spreadsheet_drawing import OneCellAnchor
-from openpyxl.drawing.xdr import XDRPositiveSize2D
+from openpyxl.drawing.spreadsheet_drawing import AbsoluteAnchor
+from openpyxl.drawing.xdr import XDRPoint2D, XDRPositiveSize2D
 from openpyxl.utils.units import pixels_to_EMU
 from typing import Dict
 from app.core.processing import Grupo
@@ -58,7 +58,7 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
     # Colocar un color de fondo claro en el área de trabajo
     light_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
     for row in range(1, 22):
-        for col_idx in range(1, 5):
+        for col_idx in range(1, 9):
             cell = portada.cell(row=row, column=col_idx)
             cell.fill = light_fill
     
@@ -69,13 +69,13 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
         # Insertar logo (fila 1–3)
     if logo_path:
         logo_img = OpenpyxlImage(logo_path)
-        logo_img.width = 160  # Ajusta según necesidades
-        logo_img.height = 100
+        logo_img.width = 140  # Ajusta según necesidades
+        logo_img.height = 90
         
-        # --- Centrar logo en el área A1:D3 ---
+        # --- Centrar logo en el área A1:H3 ---
         # 1. Calcular dimensiones del área en píxeles
         # Ancho (aprox): (caracteres * 7) + 5
-        total_width_px = sum([(portada.column_dimensions[c].width * 7) + 5 for c in ["A", "B", "C", "D", "E","F"]])
+        total_width_px = sum([(portada.column_dimensions[c].width * 7) + 5 for c in ["A", "B", "C", "D", "E", "F", "G", "H"]])
         # Alto: puntos * 4/3
         total_height_px = sum([portada.row_dimensions[r].height * 4/3 for r in [1, 2, 3]])
 
@@ -83,23 +83,26 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
         x_offset_px = max(0, (total_width_px - logo_img.width) / 2)
         y_offset_px = max(0, (total_height_px - logo_img.height) / 2)
 
-        # 3. Convertir a EMUs y crear ancla
-        anchor = OneCellAnchor()
-        anchor._from.col = 0
-        anchor._from.row = 0
-        anchor._from.colOff = pixels_to_EMU(x_offset_px)
-        anchor._from.rowOff = pixels_to_EMU(y_offset_px)
-        
+        # --- AJUSTE MANUAL DE CENTRADO ---
+        # Modifique este valor para ajustar la posición horizontal del logo.
+        # Un valor positivo lo mueve a la derecha, un valor negativo a la izquierda.
+        manual_adjustment_px = -20  # Cambie este valor, por ejemplo a 20 o -30
+        x_offset_px += manual_adjustment_px
+
+        # 3. Convertir a EMUs y crear ancla absoluta
+        x_offset_emu = pixels_to_EMU(x_offset_px)
+        y_offset_emu = pixels_to_EMU(y_offset_px)
         width_emu = pixels_to_EMU(logo_img.width)
         height_emu = pixels_to_EMU(logo_img.height)
-        anchor.ext = XDRPositiveSize2D(width_emu, height_emu)
 
-        logo_img.anchor = anchor
+        pos = XDRPoint2D(x_offset_emu, y_offset_emu)
+        size = XDRPositiveSize2D(width_emu, height_emu)
+        logo_img.anchor = AbsoluteAnchor(pos=pos, ext=size)
         
         portada.add_image(logo_img)
         
     # Espacio reservado para el logo en las filas 1‑3
-    portada.merge_cells("A1:D3")
+    portada.merge_cells("A1:H3")
     logo_cell = portada["A1"]
     set_cell_style(
         logo_cell,
@@ -107,7 +110,7 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
         alignment=Alignment(horizontal="center", vertical="center")
     )
     # Título principal del informe en filas 5‑6
-    portada.merge_cells("A5:D6")
+    portada.merge_cells("A5:H6")
     title_cell = portada["A5"]
     set_cell_style(
         title_cell,
@@ -126,8 +129,8 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
     ]
     start_row = 9
     for label, value in detail_rows:
-        # Etiqueta en columnas B-C, alineada a la derecha
-        portada.merge_cells(start_row=start_row, start_column=2, end_row=start_row, end_column=3)
+        # Etiqueta en columnas B-D, alineada a la derecha
+        portada.merge_cells(start_row=start_row, start_column=2, end_row=start_row, end_column=4)
         cell_label = portada.cell(row=start_row, column=2)
         set_cell_style(
             cell_label,
@@ -135,20 +138,20 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
             bold=True,
             alignment=Alignment(horizontal="right", vertical="center")
         )
-        # Valor en columnas D-E, alineado a la izquierda
-        portada.merge_cells(start_row=start_row, start_column=4, end_row=start_row, end_column=5)
-        cell_val = portada.cell(row=start_row, column=4)
+        # Valor en columnas E-G, alineado a la izquierda
+        portada.merge_cells(start_row=start_row, start_column=5, end_row=start_row, end_column=7)
+        cell_val = portada.cell(row=start_row, column=5)
         set_cell_style(
             cell_val,
             value,
-            alignment=Alignment(horizontal="left", vertical="center")
+            alignment=Alignment(horizontal="left", vertical="center", wrap_text=True)
         )
         # Ajustar altura de fila
-        portada.row_dimensions[start_row].height = 25
+        portada.row_dimensions[start_row].height = 30
         start_row += 2
     # Texto al pie de página con la ubicación y año (p. ej. LIMA‑2025)
     footer_row = 19
-    portada.merge_cells(start_row=footer_row, start_column=1, end_row=footer_row, end_column=4)
+    portada.merge_cells(start_row=footer_row, start_column=1, end_row=footer_row, end_column=8)
     footer_cell = portada.cell(row=footer_row, column=1)
     set_cell_style(
         footer_cell,
