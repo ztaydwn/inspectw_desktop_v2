@@ -481,6 +481,8 @@ def export_groups_to_xlsx_report(
     output_xlsx_path: str,
     progress_callback=None,
     info_path: str = os.path.join("datos", "infoproyect.txt"),
+    control_documents=None,
+    conclusiones: list[str] | None = None,
     ) -> None:
     wb = Workbook()
     wb.remove(wb.active)  # Remove default sheet
@@ -492,6 +494,7 @@ def export_groups_to_xlsx_report(
     header_font = Font(bold=True, size=12)
     gray_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
     green_fill = PatternFill(start_color="E2F0D9", end_color="E2F0D9", fill_type="solid")
+    red_fill = PatternFill(start_color="F8CBAD", end_color="F8CBAD", fill_type="solid")
     thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
 
     # Natural sort for group names
@@ -658,5 +661,167 @@ def export_groups_to_xlsx_report(
             progress_percentage = int(((idx + 1) / total_grupos) * 100)
             progress_callback.emit(progress_percentage)
 
-    wb.save(output_xlsx_path)
+    # ------------------------------------------------------------------
+    # 5. CONTROL DE DOCUMENTACIÓN DE SEGURIDAD (Hojas finales opcionales)
+    # ------------------------------------------------------------------
+    def _add_control_docs_sheet(wb: Workbook, page_title: str, items_slice: list[tuple[int, str, str]]):
+        ws = wb.create_sheet(title=page_title)
+        # Configuración de página: A4, orientación vertical, 1 página de ancho y alto, márgenes estrechos
+        ws.page_setup.orientation = ws.ORIENTATION_PORTRAIT
+        ws.page_setup.paperSize = ws.PAPERSIZE_A4
+        ws.page_setup.fitToWidth = 1
+        ws.page_setup.fitToHeight = 1
+        ws.page_margins.left = 0.25
+        ws.page_margins.right = 0.25
+        ws.page_margins.top = 0.25
+        ws.page_margins.bottom = 0.25
+        # Anchos de columna similares a la maqueta
+        ws.column_dimensions['A'].width = 5
+        ws.column_dimensions['B'].width = 90
+        ws.column_dimensions['C'].width = 45
 
+        # Título
+        ws.merge_cells('A1:C1')
+        set_cell_style(
+            ws['A1'],
+            '5. CONTROL DE DOCUMENTACIÓN DE SEGURIDAD',
+            bold=True,
+            size=12,
+            alignment=Alignment(horizontal='left', vertical='center')
+        )
+        ws.row_dimensions[1].height = 25
+
+        # Encabezados
+        ws['A3'].value = 'N°'
+        ws['B3'].value = 'CERTIFICADOS, CONSTANCIAS Y/O PROTOCOLO'
+        ws['C3'].value = 'SITUACION'
+        for col in ['A', 'B', 'C']:
+            cell = ws[f'{col}3']
+            cell.font = Font(bold=True, size=10)
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            cell.fill = gray_fill
+            cell.border = thin_border
+        ws.row_dimensions[3].height = 22
+
+        # Filas
+        row = 4
+        for num, descripcion, situacion in items_slice:
+            set_cell_style(ws[f'A{row}'], str(num), size=10, alignment=Alignment(horizontal='center', vertical='top'), border=thin_border)
+
+            desc_cell = ws[f'B{row}']
+            set_cell_style(desc_cell, descripcion, size=10, alignment=Alignment(wrap_text=True, vertical='top'), border=thin_border)
+
+            sit_cell = ws[f'C{row}']
+            # Determinar color según el contenido de situacion
+            sit_text = situacion or ''
+            low = sit_text.lower()
+            fill = None
+            if 'no aplica' in low:
+                fill = gray_fill
+                # Normalizamos el texto para que al menos diga NO APLICA
+                if not sit_text.strip():
+                    sit_text = 'NO APLICA'
+            elif 'observado' in low or 'observación' in low or 'observacion' in low:
+                fill = red_fill
+            elif 'correcto' in low or 'cumple' in low:
+                fill = green_fill
+            set_cell_style(sit_cell, sit_text, size=10, alignment=Alignment(wrap_text=True, vertical='top'), fill=fill, border=thin_border)
+
+            # Altura de fila estimada
+            est = max(2, estimate_visual_lines(descripcion, 70), estimate_visual_lines(sit_text, 35))
+            ws.row_dimensions[row].height = 18 * est
+            row += 1
+
+        # Bordes de tabla ya asignados celda a celda con border=thin_border
+        # Limitar el área de impresión exactamente a la tabla construida
+        ws.print_area = f"A1:C{row-1}"
+        return ws
+
+    # Si se proporcionó control_documents, construir hojas
+    if control_documents:
+        # Descripciones fijas de los 22 ítems (según el formato mostrado)
+        items_descriptions = [
+            "Certificado vigente de medición de resistencia del sistema de puesta a tierra: ... (valor no debe exceder los 25 ohmios; firmado por profesional colegiado y habilitado).",
+            "Certificado de sistema de detección y alarma de incendios: cantidad y ubicación de detectores; incluye protocolo de pruebas de operatividad y/o mantenimiento; considerar NFPA 72 y Norma A.130 REN.",
+            "Certificado de extintores: cantidad, ubicación, numeración, tipo y peso de los extintores instalados; incluye protocolos de operatividad y/o mantenimiento; Norma A.130 RNE y NTP 350.043-1.",
+            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Rociadores (literal A) art. 102 Norma A.130 RNE; NFPA 13.",
+            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Rociadores especiales tipo Spray (literal B) art. 102 Norma A.130 RNE; NFPA 15.",
+            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Redes Principales de Protección Contra Incendios enterradas (literal C) art. 102 Norma A.130 RNE; NFPA 24.",
+            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Montantes y Gabinetes de Agua Contra Incendio (literal H) art. 102 Norma A.130 RNE; NFPA 14.",
+            "Protocolos de Pruebas de Operatividad y/o Mantenimiento de las Bombas de Agua Contra Incendio (art. 152 Norma A.130 RNE); NFPA 20; incluye pruebas de presión hidrostatica.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento de las luces de emergencia según Código Nacional de Electricidad – Normas de Utilización y manual del fabricante.",
+            "Protocolo de pruebas de operatividad y/o las puertas cortafuego y sus dispositivos; certificación para uso cortafuego; Norma A.130 RNE; manual del fabricante.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento del sistema de administración de humos (literal b) Art. 94 de la Norma A.130 del RNE; Guía NFPA 92B.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento del sistema de Presurización de Escaleras de Evacuación; Norma A.130 del RNE; NFPA 92.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento del sistema Mecánico de Extracción de Monóxido de Carbono; art.69 Norma A.010; Condiciones Generales del Diseño del RNE.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento del Teléfono de Emergencia en Ascensor; art.30 Norma A.010; art.19 Norma A.130.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento del Teléfono de Bomberos; NFPA 72.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento de Ascensor, Montacarga, Escaleras mecánicas y equipos de elevación eléctrica; firmado por profesional colegiado y habilitado.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento de Equipos de Aire Acondicionado.",
+            "Certificado de vidrios templados expedido por el fabricante.",
+            "Certificado de laminado de vidrios y/o espejos.",
+            "Constancia de registro de hidrocarburos emitido por OSINERGMIN y constancia de operatividad y mantenimiento de la red interna de GLP o líquido combustible. NTP 321.121.",
+            "Certificado de pintura ignífuga en maderas.",
+            "OTROS (por ejemplo: Protocolo de aislamiento de tableros).",
+        ]
+
+        # Normalizar diferentes estructuras de entrada
+        # Acepta: {1: 'texto'}, [{'numero':1,'situacion':'...'}], [('1','texto')], etc.
+        norm: dict[int, str] = {}
+        if isinstance(control_documents, dict):
+            for k, v in control_documents.items():
+                try:
+                    num = int(k)
+                    norm[num] = str(v) if v is not None else ''
+                except Exception:
+                    continue
+        elif isinstance(control_documents, (list, tuple)):
+            for item in control_documents:
+                if isinstance(item, dict):
+                    num = item.get('numero') or item.get('num') or item.get('id')
+                    if num is None:
+                        continue
+                    try:
+                        num = int(num)
+                    except Exception:
+                        continue
+                    norm[num] = str(item.get('situacion', ''))
+                elif isinstance(item, (list, tuple)) and len(item) >= 2:
+                    try:
+                        num = int(item[0])
+                    except Exception:
+                        continue
+                    norm[num] = str(item[1])
+
+        # Construir lista total de (n, descripcion, situacion)
+        full_items = []
+        for i, desc in enumerate(items_descriptions, start=1):
+            full_items.append((i, desc, norm.get(i, 'NO APLICA')))
+
+        # Rebanar en páginas (como en las imágenes: 1-8, 9-16, 17-22)
+        pages = [
+            ('CONTROL DOC. (1)', full_items[0:8]),
+            ('CONTROL DOC. (2)', full_items[8:16]),
+            ('CONTROL DOC. (3)', full_items[16:22]),
+        ]
+        created = []
+        for title, slice_items in pages:
+            if slice_items:
+                created.append(_add_control_docs_sheet(wb, title, slice_items))
+
+        # Agregar conclusiones (opcional) en la última hoja
+        if conclusiones and created:
+            ws = created[-1]
+            # Buscar primera fila libre
+            last_row = ws.max_row + 2
+            ws.merge_cells(start_row=last_row, start_column=1, end_row=last_row, end_column=3)
+            set_cell_style(ws.cell(row=last_row, column=1), '6. CONCLUSIONES:', bold=True, size=12, alignment=Alignment(horizontal='left', vertical='center'))
+            ws.row_dimensions[last_row].height = 24
+            row = last_row + 1
+            for i, txt in enumerate(conclusiones, start=1):
+                ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
+                set_cell_style(ws.cell(row=row, column=1), f"{i}. {txt}", size=10, alignment=Alignment(wrap_text=True, vertical='top'))
+                ws.row_dimensions[row].height = 18 * max(2, estimate_visual_lines(txt, 90))
+                row += 1
+
+    wb.save(output_xlsx_path)

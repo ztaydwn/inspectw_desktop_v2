@@ -9,6 +9,7 @@ from app.core.processing import (cargar_zip, procesar_zip, reaplicar_recomendaci
                                  cargar_directorio)
 from app.report.pptx_writer import export_groups_to_pptx_report
 from app.report.xlsx_writer import export_groups_to_xlsx_report
+import re, json, csv, io
 
 class DataProcessorWorker(QObject):
     finished = pyqtSignal(dict, dict, list)
@@ -59,6 +60,115 @@ class ReportWorker(QObject):
         self.destino = destino
         self._is_running = True
 
+    def _extract_control_documents(self):
+        """Busca un archivo llamado 'control_documents' en self.archivos y lo
+        convierte en un dict {numero:int -> situacion:str}. Acepta .json, .csv y .txt."""
+        try:
+            if not self.archivos:
+                return None
+            candidate = None
+            for path in self.archivos.keys():
+                base = os.path.basename(path).lower()
+                if base.startswith('control_documents'):
+                    candidate = path
+                    break
+            if not candidate:
+                return None
+            data = self.archivos.get(candidate)
+            if not data:
+                return None
+            base = os.path.basename(candidate).lower()
+            # JSON
+            if base.endswith('.json'):
+                try:
+                    obj = json.loads(data.decode('utf-8', errors='ignore'))
+                    res = {}
+                    if isinstance(obj, dict):
+                        for k, v in obj.items():
+                            try:
+                                res[int(k)] = '' if v is None else str(v)
+                            except Exception:
+                                pass
+                    elif isinstance(obj, list):
+                        for item in obj:
+                            if isinstance(item, dict):
+                                num = item.get('numero') or item.get('num') or item.get('id')
+                                if num is None:
+                                    continue
+                                try:
+                                    num = int(num)
+                                except Exception:
+                                    continue
+                                res[num] = str(item.get('situacion', ''))
+                    return res or None
+                except Exception:
+                    return None
+            # CSV
+            if base.endswith('.csv'):
+                try:
+                    text = data.decode('utf-8', errors='ignore')
+                    f = io.StringIO(text)
+                    sample = text[:1024]
+                    delimiter = ','
+                    if sample.count(';') > sample.count(','):
+                        delimiter = ';'
+                    elif '\t' in sample:
+                        delimiter = '\t'
+                    reader = csv.reader(f, delimiter=delimiter)
+                    headers = next(reader, None)
+                    res = {}
+                    for row in reader:
+                        if not row:
+                            continue
+                        num = None
+                        situacion = None
+                        if headers and any((h or '').lower().startswith('num') for h in headers):
+                            try:
+                                idx_num = next(i for i,h in enumerate(headers) if (h or '').lower().startswith('num'))
+                                num = int(row[idx_num])
+                            except Exception:
+                                continue
+                            try:
+                                idx_sit = next(i for i,h in enumerate(headers) if (h or '').lower().startswith('sit'))
+                                situacion = row[idx_sit]
+                            except Exception:
+                                situacion = row[-1] if row else ''
+                        else:
+                            for val in row:
+                                try:
+                                    num = int(val)
+                                    situacion = row[-1]
+                                    break
+                                except Exception:
+                                    continue
+                        if num is not None:
+                            res[num] = situacion or ''
+                    return res or None
+                except Exception:
+                    return None
+            # TXT u otros
+            try:
+                text = data.decode('utf-8', errors='ignore')
+            except Exception:
+                return None
+            res = {}
+            pattern = re.compile(r"(?ms)^\s*(\d{1,2})\b[\s\S]*?SITUACI[OÓ]N\s*:\s*(.+?)(?=^\s*\d{1,2}\b|\Z)", re.I)
+            for m in pattern.finditer(text):
+                try:
+                    num = int(m.group(1))
+                except Exception:
+                    continue
+                sit = m.group(2).strip()
+                res[num] = sit
+            if not res:
+                simple = re.compile(r"^\s*(\d{1,2})\s*[:.-]\s*(.+)$", re.M)
+                for m in simple.finditer(text):
+                    res[int(m.group(1))] = m.group(2).strip()
+            return res or None
+        except Exception:
+            return None
+
+
     def run(self):
         try:
             if not self._is_running: 
@@ -66,7 +176,8 @@ class ReportWorker(QObject):
                 return
 
             if self.report_type == 'xlsx':
-                export_groups_to_xlsx_report(self.grupos, self.archivos, self.destino, progress_callback=self.progress)
+                control_docs = self._extract_control_documents()
+                export_groups_to_xlsx_report(self.grupos, self.archivos, self.destino, progress_callback=self.progress, control_documents=control_docs)
             elif self.report_type == 'pptx':
                 export_groups_to_pptx_report(self.grupos, self.archivos, self.destino, progress_callback=self.progress)
             
