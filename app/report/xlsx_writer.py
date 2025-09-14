@@ -12,6 +12,7 @@ from app.core.processing import Grupo
 from app.utils.nlg_utils import agrupa_y_redacta
 from PIL import Image, ImageOps
 import io, math, os, re
+import unicodedata
 
 def read_project_info(path: str) -> Dict[str, str]:
     """Lee pares clave:valor desde ``path`` y los retorna en un diccionario.
@@ -30,13 +31,44 @@ def read_project_info(path: str) -> Dict[str, str]:
     except FileNotFoundError:
         pass
     return info
-def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> None:
+
+def parse_project_info_text(text: str) -> Dict[str, str]:
+    """Convierte texto con líneas 'clave: valor' en un diccionario.
+    Claves se normalizan a minúsculas conservando tildes.
+    """
+    info: Dict[str, str] = {}
+    if not text:
+        return info
+    for line in text.splitlines():
+        if ":" in line:
+            key, value = line.split(":", 1)
+            info[key.strip().lower()] = value.strip()
+    return info
+def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: str = None) -> None:
     """Agrega hojas iniciales independientes al ``Workbook``.
     Los valores se obtienen del archivo ``infoproyect.txt`` con formato
     ``clave: valor`` por línea. Si el archivo no existe, las celdas quedarán
     vacías y el resto del proceso no se verá afectado.
     """
-    info = read_project_info(info_path)
+    # Permite pasar un dict ya parseado o una ruta a archivo
+    if isinstance(info_path, dict):
+        info = info_path
+    else:
+        info = read_project_info(info_path)
+    # Helper para obtener valores tolerando variaciones de clave
+    def _norm_key(s: str) -> str:
+        s = unicodedata.normalize('NFD', s or '')
+        s = ''.join(ch for ch in s if unicodedata.category(ch) != 'Mn')
+        s = s.lower()
+        s = re.sub(r'[^a-z0-9]+', ' ', s).strip()
+        return s
+    info_idx = {_norm_key(k): v for k, v in info.items()}
+    def iget(*names: str) -> str:
+        for n in names:
+            val = info_idx.get(_norm_key(n))
+            if val:
+                return val
+        return ""
     # Preparar estilos locales (bordes y rellenos) para evitar referencias a
     # variables externas como `gray_fill` o `thin_border` que sólo existen en
     # otros contextos. Estos se usan para tablas en la hoja de desarrollo.
@@ -52,6 +84,19 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
     # usadas se rellenan con un tono gris claro para simular el fondo del
     # informe.
     portada = wb.create_sheet(title="PORTADA", index=0)
+    # Configuración de página A4 y márgenes
+    portada.page_setup.orientation = portada.ORIENTATION_PORTRAIT
+    portada.page_setup.paperSize = portada.PAPERSIZE_A4
+    portada.page_setup.fitToWidth = 1
+    portada.page_setup.fitToHeight = 1
+    try:
+        portada.sheet_properties.pageSetUpPr.fitToPage = True
+    except Exception:
+        pass
+    portada.page_margins.left = 0.25
+    portada.page_margins.right = 0.25
+    portada.page_margins.top = 0.25
+    portada.page_margins.bottom = 0.25
     # Definir el ancho de las columnas (A–H) para dar un margen amplio en A4
     for col in ["A", "B", "C", "D", "E", "F", "G", "H"]:
         portada.column_dimensions[col].width = 11
@@ -109,9 +154,24 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
         "",  # Dejar sin texto; se podría insertar una imagen aquí si estuviera disponible
         alignment=Alignment(horizontal="center", vertical="center")
     )
+    # Preparar variables para el título principal antes de usarlas
+    try:
+        main_title = iget("titulo") or "INFORME DE SIMULACRO DE INSPECCION DE DEFENSA CIVIL EN EDIFICACIONES"
+    except Exception:
+        main_title = "INFORME DE SIMULACRO DE INSPECCION DE DEFENSA CIVIL EN EDIFICACIONES"
+    # Definir celda de título por adelantado
+    # (la fusión posterior mantendrá el valor en A5)
+    try:
+        portada["A5"].value = main_title
+        title_cell = portada["A5"]
+    except Exception:
+        pass
+    # Sustituir el título por el del infoproyecto si existe
+    title_cell.value = main_title
     # Título principal del informe en filas 5‑6
     portada.merge_cells("A5:H6")
     title_cell = portada["A5"]
+    main_title = iget("titulo") or "INFORME DE SIMULACRO DE INSPECCION DE DEFENSA CIVIL EN EDIFICACIONES"
     set_cell_style(
         title_cell,
         "INFORME DE SIMULACRO DE INSPECCIÓN DE DEFENSA CIVIL EN EDIFICACIONES",
@@ -119,6 +179,11 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
         size=14,
         alignment=Alignment(horizontal="center", vertical="center", wrap_text=True)
     )
+    # Asegurar que el título final use el valor del infoproyecto si existe
+    try:
+        title_cell.value = main_title
+    except Exception:
+        pass
     portada.row_dimensions[5].height = 45
     portada.row_dimensions[6].height = 45
     # Datos del proyecto: etiquetas y valores
@@ -149,6 +214,13 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
         # Ajustar altura de fila
         portada.row_dimensions[start_row].height = 30
         start_row += 2
+    # Reescribir valores con claves alternativas si están en el infoproyecto
+    try:
+        portada.cell(row=9, column=5).value = iget("nombre del establecimiento", "nombre", "establecimiento") or portada.cell(row=9, column=5).value
+        portada.cell(row=11, column=5).value = iget("propietario", "propietaria") or portada.cell(row=11, column=5).value
+        portada.cell(row=13, column=5).value = iget("direccion", "dirección") or portada.cell(row=13, column=5).value
+    except Exception:
+        pass
     # Texto al pie de página con la ubicación y año (p. ej. LIMA‑2025)
     footer_row = 19
     portada.merge_cells(start_row=footer_row, start_column=1, end_row=footer_row, end_column=8)
@@ -169,6 +241,19 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
     # datos básicos de la inspección y antecedentes. Se organizan los textos en
     # filas numeradas de acuerdo al formato.
     datos = wb.create_sheet(title="DATOS GENERALES", index=1)
+    # Configuración de página A4
+    datos.page_setup.orientation = datos.ORIENTATION_PORTRAIT
+    datos.page_setup.paperSize = datos.PAPERSIZE_A4
+    datos.page_setup.fitToWidth = 1
+    datos.page_setup.fitToHeight = 1
+    try:
+        datos.sheet_properties.pageSetUpPr.fitToPage = True
+    except Exception:
+        pass
+    datos.page_margins.left = 0.25
+    datos.page_margins.right = 0.25
+    datos.page_margins.top = 0.25
+    datos.page_margins.bottom = 0.25
     # Definir anchos de columna
     datos.column_dimensions["A"].width = 28
     datos.column_dimensions["B"].width = 45
@@ -185,6 +270,11 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
         alignment=Alignment(horizontal="center", vertical="center")
     )
     datos.row_dimensions[1].height = 35
+    # Reemplazar encabezado con el Título del infoproyecto si está disponible
+    try:
+        datos["A1"].value = iget("titulo") or datos["A1"].value
+    except Exception:
+        pass
     # Sección 1: Datos generales
     datos.merge_cells("A3:D3")
     set_cell_style(
@@ -273,6 +363,19 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
     # --------------------------------------------------------------------------
     # Esta hoja reproduce el desglose de la visita técnica y las observaciones.
     desarrollo = wb.create_sheet(title="DESARROLLO", index=2)
+    # Configuración de página A4
+    desarrollo.page_setup.orientation = desarrollo.ORIENTATION_PORTRAIT
+    desarrollo.page_setup.paperSize = desarrollo.PAPERSIZE_A4
+    desarrollo.page_setup.fitToWidth = 1
+    desarrollo.page_setup.fitToHeight = 1
+    try:
+        desarrollo.sheet_properties.pageSetUpPr.fitToPage = True
+    except Exception:
+        pass
+    desarrollo.page_margins.left = 0.25
+    desarrollo.page_margins.right = 0.25
+    desarrollo.page_margins.top = 0.25
+    desarrollo.page_margins.bottom = 0.25
     desarrollo.column_dimensions["A"].width = 50
     desarrollo.column_dimensions["B"].width = 15
     desarrollo.column_dimensions["C"].width = 10
@@ -433,6 +536,21 @@ def add_intro_sheets(wb: Workbook, info_path: str, logo_path: str = None) -> Non
     desarrollo.row_dimensions[comentarios_row + 1].height = 25
     desarrollo.row_dimensions[comentarios_row + 2].height = 25
 
+    # ------------------------------------------------------------------
+    # Completar DATOS GENERALES con valores del infoproyecto si existen
+    # ------------------------------------------------------------------
+    try:
+        datos["B4"].value = iget("propietario", "propietaria") or datos["B4"].value
+        datos["B5"].value = iget("nombre del establecimiento", "nombre", "establecimiento") or datos["B5"].value
+        datos["B6"].value = iget("direccion", "dirección") or datos["B6"].value
+        datos["B7"].value = iget("fecha", "dia de la inspeccion", "día de la inspección") or datos["B7"].value
+        datos["B8"].value = iget("especialidad") or datos["B8"].value
+        datos["B9"].value = iget("inspectores", "profesionales designados") or datos["B9"].value
+        datos["B11"].value = iget("acompañamiento", "acompanamiento", "personal de acompañamiento") or datos["B11"].value
+        datos["B13"].value = iget("comentarios", "comentarios del proceso") or datos["B13"].value
+    except Exception:
+        pass
+
 def natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s[0])]
 
@@ -488,7 +606,20 @@ def export_groups_to_xlsx_report(
     wb.remove(wb.active)  # Remove default sheet
 
     # Agregar hojas independientes iniciales
-    add_intro_sheets(wb, info_path, logo_path="datos/portadat.png")
+    # Intentar leer 'infoproyect.txt' desde los archivos cargados (ZIP/carpeta)
+    info_from_archivos = None
+    try:
+        for k, v in archivos.items():
+            base = os.path.basename(k).lower()
+            if base.startswith('infoproyect') and base.endswith('.txt'):
+                try:
+                    info_from_archivos = parse_project_info_text(v.decode('utf-8', errors='ignore'))
+                    break
+                except Exception:
+                    pass
+    except Exception:
+        pass
+    add_intro_sheets(wb, info_from_archivos if info_from_archivos else info_path, logo_path="datos/portadat.png")
 
     # Define styles
     header_font = Font(bold=True, size=12)
@@ -671,14 +802,22 @@ def export_groups_to_xlsx_report(
         ws.page_setup.paperSize = ws.PAPERSIZE_A4
         ws.page_setup.fitToWidth = 1
         ws.page_setup.fitToHeight = 1
+        # Forzar el uso de FitToPage en algunos visores
+        try:
+            ws.sheet_properties.pageSetUpPr.fitToPage = True
+        except Exception:
+            pass
         ws.page_margins.left = 0.25
         ws.page_margins.right = 0.25
         ws.page_margins.top = 0.25
         ws.page_margins.bottom = 0.25
+        # Centrar ligeramente para mejor presentación
+        ws.print_options.horizontalCentered = True
         # Anchos de columna similares a la maqueta
         ws.column_dimensions['A'].width = 5
-        ws.column_dimensions['B'].width = 90
-        ws.column_dimensions['C'].width = 45
+        # Reducimos el ancho para garantizar 1 página de ancho
+        ws.column_dimensions['B'].width = 60
+        ws.column_dimensions['C'].width = 32
 
         # Título
         ws.merge_cells('A1:C1')
@@ -728,7 +867,8 @@ def export_groups_to_xlsx_report(
             set_cell_style(sit_cell, sit_text, size=10, alignment=Alignment(wrap_text=True, vertical='top'), fill=fill, border=thin_border)
 
             # Altura de fila estimada
-            est = max(2, estimate_visual_lines(descripcion, 70), estimate_visual_lines(sit_text, 35))
+            # Estimar con chars_per_line acordes a los nuevos anchos
+            est = max(2, estimate_visual_lines(descripcion, 55), estimate_visual_lines(sit_text, 28))
             ws.row_dimensions[row].height = 18 * est
             row += 1
 
@@ -741,26 +881,26 @@ def export_groups_to_xlsx_report(
     if control_documents:
         # Descripciones fijas de los 22 ítems (según el formato mostrado)
         items_descriptions = [
-            "Certificado vigente de medición de resistencia del sistema de puesta a tierra: ... (valor no debe exceder los 25 ohmios; firmado por profesional colegiado y habilitado).",
-            "Certificado de sistema de detección y alarma de incendios: cantidad y ubicación de detectores; incluye protocolo de pruebas de operatividad y/o mantenimiento; considerar NFPA 72 y Norma A.130 REN.",
-            "Certificado de extintores: cantidad, ubicación, numeración, tipo y peso de los extintores instalados; incluye protocolos de operatividad y/o mantenimiento; Norma A.130 RNE y NTP 350.043-1.",
-            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Rociadores (literal A) art. 102 Norma A.130 RNE; NFPA 13.",
-            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Rociadores especiales tipo Spray (literal B) art. 102 Norma A.130 RNE; NFPA 15.",
-            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Redes Principales de Protección Contra Incendios enterradas (literal C) art. 102 Norma A.130 RNE; NFPA 24.",
-            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Montantes y Gabinetes de Agua Contra Incendio (literal H) art. 102 Norma A.130 RNE; NFPA 14.",
-            "Protocolos de Pruebas de Operatividad y/o Mantenimiento de las Bombas de Agua Contra Incendio (art. 152 Norma A.130 RNE); NFPA 20; incluye pruebas de presión hidrostatica.",
-            "Protocolo de pruebas de operatividad y/o mantenimiento de las luces de emergencia según Código Nacional de Electricidad – Normas de Utilización y manual del fabricante.",
-            "Protocolo de pruebas de operatividad y/o las puertas cortafuego y sus dispositivos; certificación para uso cortafuego; Norma A.130 RNE; manual del fabricante.",
-            "Protocolo de pruebas de operatividad y/o mantenimiento del sistema de administración de humos (literal b) Art. 94 de la Norma A.130 del RNE; Guía NFPA 92B.",
-            "Protocolo de pruebas de operatividad y/o mantenimiento del sistema de Presurización de Escaleras de Evacuación; Norma A.130 del RNE; NFPA 92.",
-            "Protocolo de pruebas de operatividad y/o mantenimiento del sistema Mecánico de Extracción de Monóxido de Carbono; art.69 Norma A.010; Condiciones Generales del Diseño del RNE.",
-            "Protocolo de pruebas de operatividad y/o mantenimiento del Teléfono de Emergencia en Ascensor; art.30 Norma A.010; art.19 Norma A.130.",
-            "Protocolo de pruebas de operatividad y/o mantenimiento del Teléfono de Bomberos; NFPA 72.",
-            "Protocolo de pruebas de operatividad y/o mantenimiento de Ascensor, Montacarga, Escaleras mecánicas y equipos de elevación eléctrica; firmado por profesional colegiado y habilitado.",
+            "Certificado vigente de medición de resistencia del sistema de puesta a tierra: De conformidad con el Código Nacional de Electricidad, el valor de la medición de resistencia del sistema de puesta a tierra no debe exceder los 25 ohmios. El certificado de dicha medición debe encontrarse vigente (la medición de la resistencia del pozo a tierra debe realizarse anualmente) y estar firmado por un ingeniero electricista o mecánico electricista, colegiado y habilitado.",
+            "Certificado de sistema de detección y alarma de incendios: Debe indicar la cantidad y ubicación de detectores del sistema de detección y alarma de incendios centralizada con que cuenta el Establecimiento, incluye el protocolo de pruebas de operatividad y/o mantenimiento del sistema. Se debe considerar lo señalado en Art. 52 al 65 de la Norma A.130 del RNE, y la inspección, prueba y mantenimiento según Cap. 14 de la NFPA 72.",
+            "Certificado de extintores: Debe indicar la cantidad, ubicación, numeración, tipo y peso de los extintores instalados en el Establecimiento, incluye los protocolos de pruebas de operatividad y/o mantenimiento de los extintores. Considerar lo señalado en art. 163 al 165 de la Norma A.130 RNE y NTP 350.043-1.",
+            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Rociadores: Su elaboración según el literal A) del art. 102 de la Norma A.130 RNE; la inspección, prueba y mantenimiento según estándar NFPA 25 según lo establecido en el articulo 27.1 de la NFPA 13.",
+            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Rociadores especiales tipo Spray: Su elaboración según el literal B) del art. 102 de la Norma A.130 RNE; la inspección, prueba y mantenimiento según estándar NFPA 25 según lo establecido en el articulo 11.1.1 de la NFPA 15.",
+            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Redes Principales de Protección Contra Incendios enterradas (casos de fabricas, almacenes, otros): Su elaboración según el literal C) del art. 102 de la Norma A.130 RNE; la inspección, prueba y mantenimiento según estándar NFPA 25 según lo establecido en el articulo 14.1 de la NFPA 24.",
+            "Protocolos de Pruebas de Operatividad y/o Mantenimiento del Sistema de Montantes y Gabinetes de Agua Contra Incendio: Su elaboración según el literal H) del art. 102 de la Norma A.130 RNE; la inspección, prueba y mantenimiento según estándar NFPA 25 según lo establecido en el articulo 13.1 de la NFPA 14.",
+            "Protocolos de Pruebas de Operatividad y/o Mantenimiento de las Bombas de Agua Contra Incendio: Su elaboración según el art. 152 de la Norma A.130 RNE; la inspección, prueba y mantenimiento según estándar NFPA 25 según lo establecido en el articulo 14.4 de la NFPA 20. Incluyen las pruebas de presión hidrostática.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento de las luces de emergencia: Su elaboración según la Sección 010-010 (3) del Código Nacional de Electricidad – Normas de Utilización. Mantenimiento según manual del fabricante.",
+            "Protocolo de pruebas de operatividad y/o las puertas cortafuego y sus dispositivos como marcos, bisagras cierrapuertas, manija, cerradura o barra antipánico: Su certificación para uso cortafuego, según los artículos 10 y 11 de la Norma A.130 RNE. Mantenimiento según el manual del fabricante.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento del sistema de administración de humos: Su elaboración según literal b) del Art. 94 de la Norma A.130 del RNE; la inspección, prueba y mantenimiento según Capítulo 8 del estándar NFPA 92 según lo establecido en la Guía NFPA 92B.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento del sistema de Presurización de Escaleras de Evacuación: Su elaboración según Sub Capitulo IV. Requisitos de los Sistemas de Presurización de Escaleras de la Norma A.130 del RNE; la inspección, prueba y mantenimiento según artículo 7.3 del Capítulo 4.6 y capítulo 8 de la NFPA 92.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento del sistema Mecánico de Extracción de Monóxido de Carbono: Su elaboración según el art.69 de la Norma A.010. Condiciones Generales del Diseño del RNE.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento del Teléfono de Emergencia en Ascensor: Su elaboración según los literales C) y D) del art.30 de la Norma A.010. Condiciones Generales del Diseño del RNE; art. 19 de la Norma A.130. Requisitos de Seguridad del RNE.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento del Teléfono de Bomberos: Según la NFPA 72. Para la elaboración de las memorias o protocolos de pruebas de operatividad y mantenimiento de los equipos de seguridad y protección contraincendios, se debe cumplir con los requerimientos mínimos establecidos en la normatividad señalada en los párrafos precedentes, en las especificaciones técnicas de los fabricantes, estándares y otras que resulten aplicables, para tales efectos puede hacer uso de los formatos sugeridos por las normas NFPA u otros aplicables.",
+            "Protocolo de pruebas de operatividad y/o mantenimiento de Ascensor, Montacarga, Escaleras mecánicas y equipos de elevación eléctrica, firmado por ing. mecánico, electricista o mecánico electricista colegiado y habilitado.",
             "Protocolo de pruebas de operatividad y/o mantenimiento de Equipos de Aire Acondicionado.",
             "Certificado de vidrios templados expedido por el fabricante.",
             "Certificado de laminado de vidrios y/o espejos.",
-            "Constancia de registro de hidrocarburos emitido por OSINERGMIN y constancia de operatividad y mantenimiento de la red interna de GLP o líquido combustible. NTP 321.121.",
+            "Constancia de registro de hidrocarburos emitido por  OSINERGMIN, además de la constancia de Operatividad y mantenimiento de la red de interna de GLP y/o líquido combustible, emitido por empresa o profesional especializado.  NTP 321.121",
             "Certificado de pintura ignífuga en maderas.",
             "OTROS (por ejemplo: Protocolo de aislamiento de tableros).",
         ]
