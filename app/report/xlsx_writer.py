@@ -45,11 +45,7 @@ def parse_project_info_text(text: str) -> Dict[str, str]:
             info[key.strip().lower()] = value.strip()
     return info
 def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: str = None) -> None:
-    """Agrega hojas iniciales independientes al ``Workbook``.
-    Los valores se obtienen del archivo ``infoproyect.txt`` con formato
-    ``clave: valor`` por línea. Si el archivo no existe, las celdas quedarán
-    vacías y el resto del proceso no se verá afectado.
-    """
+    """Agrega hojas iniciales independientes al ``Workbook``. Los valores se obtienen del archivo ``infoproyect.txt`` con formato ``clave: valor`` por línea. Si el archivo no existe, las celdas quedarán vacías y el resto del proceso no se verá afectado."""
     # Permite pasar un dict ya parseado o una ruta a archivo
     if isinstance(info_path, dict):
         info = info_path
@@ -74,17 +70,12 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
     # otros contextos. Estos se usan para tablas en la hoja de desarrollo.
     gray_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
     thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+    thick_top_border = Border(top=Side(style='medium'))
 
     # --------------------------------------------------------------------------
     # Hoja de portada
     # --------------------------------------------------------------------------
-    # La portada se diseña como una plantilla con un aspecto similar al modelo
-    # proporcionado. Se definen anchos de columna amplios, alturas de fila y
-    # combinaciones de celdas para lograr una disposición agradable. Las celdas
-    # usadas se rellenan con un tono gris claro para simular el fondo del
-    # informe.
     portada = wb.create_sheet(title="PORTADA", index=0)
-    # Configuración de página A4 y márgenes
     portada.page_setup.orientation = portada.ORIENTATION_PORTRAIT
     portada.page_setup.paperSize = portada.PAPERSIZE_A4
     portada.page_setup.fitToWidth = 1
@@ -97,142 +88,129 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
     portada.page_margins.right = 0.25
     portada.page_margins.top = 0.25
     portada.page_margins.bottom = 0.25
-    # Definir el ancho de las columnas (A–H) para dar un margen amplio en A4
+
     for col in ["A", "B", "C", "D", "E", "F", "G", "H"]:
-        portada.column_dimensions[col].width = 11
-    # Colocar un color de fondo claro en el área de trabajo
+        portada.column_dimensions[col].width = 12
+
     light_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
-    for row in range(1, 22):
+    for row in range(1, 51): # Increased row range for A4 feel
         for col_idx in range(1, 9):
             cell = portada.cell(row=row, column=col_idx)
             cell.fill = light_fill
-    
-    portada.row_dimensions[1].height = 30
-    portada.row_dimensions[2].height = 30
-    portada.row_dimensions[3].height = 30
 
-        # Insertar logo (fila 1–3)
-    if logo_path:
+    # --- 1. Logo ---
+    portada.row_dimensions[1].height = 25
+    portada.row_dimensions[2].height = 25
+    portada.row_dimensions[3].height = 25
+    if logo_path and os.path.exists(logo_path):
         logo_img = OpenpyxlImage(logo_path)
-        logo_img.width = 140  # Ajusta según necesidades
-        logo_img.height = 90
+        logo_img.width = 210
+        logo_img.height = 75
         
-        # --- Centrar logo en el área A1:H3 ---
-        # 1. Calcular dimensiones del área en píxeles
-        # Ancho (aprox): (caracteres * 7) + 5
         total_width_px = sum([(portada.column_dimensions[c].width * 7) + 5 for c in ["A", "B", "C", "D", "E", "F", "G", "H"]])
-        # Alto: puntos * 4/3
-        total_height_px = sum([portada.row_dimensions[r].height * 4/3 for r in [1, 2, 3]])
-
-        # 2. Calcular offset para centrar
         x_offset_px = max(0, (total_width_px - logo_img.width) / 2)
-        y_offset_px = max(0, (total_height_px - logo_img.height) / 2)
+        y_offset_px = pixels_to_EMU(15) # Small top margin
 
-        # --- AJUSTE MANUAL DE CENTRADO ---
-        # Modifique este valor para ajustar la posición horizontal del logo.
-        # Un valor positivo lo mueve a la derecha, un valor negativo a la izquierda.
-        manual_adjustment_px = -20  # Cambie este valor, por ejemplo a 20 o -30
-        x_offset_px += manual_adjustment_px
-
-        # 3. Convertir a EMUs y crear ancla absoluta
         x_offset_emu = pixels_to_EMU(x_offset_px)
-        y_offset_emu = pixels_to_EMU(y_offset_px)
         width_emu = pixels_to_EMU(logo_img.width)
         height_emu = pixels_to_EMU(logo_img.height)
 
-        pos = XDRPoint2D(x_offset_emu, y_offset_emu)
+        pos = XDRPoint2D(x_offset_emu, y_offset_px)
         size = XDRPositiveSize2D(width_emu, height_emu)
         logo_img.anchor = AbsoluteAnchor(pos=pos, ext=size)
-        
         portada.add_image(logo_img)
-        
-    # Espacio reservado para el logo en las filas 1‑3
-    portada.merge_cells("A1:H3")
-    logo_cell = portada["A1"]
-    set_cell_style(
-        logo_cell,
-        "",  # Dejar sin texto; se podría insertar una imagen aquí si estuviera disponible
-        alignment=Alignment(horizontal="center", vertical="center")
-    )
-    # Preparar variables para el título principal antes de usarlas
-    try:
-        main_title = iget("titulo") or "INFORME DE SIMULACRO DE INSPECCION DE DEFENSA CIVIL EN EDIFICACIONES"
-    except Exception:
-        main_title = "INFORME DE SIMULACRO DE INSPECCION DE DEFENSA CIVIL EN EDIFICACIONES"
-    # Definir celda de título por adelantado
-    # (la fusión posterior mantendrá el valor en A5)
-    try:
-        portada["A5"].value = main_title
-        title_cell = portada["A5"]
-    except Exception:
-        pass
-    # Sustituir el título por el del infoproyecto si existe
-    title_cell.value = main_title
-    # Título principal del informe en filas 5‑6
+
+    # --- 2. Separator line after logo ---
+    portada.row_dimensions[4].height = 15
+    portada.merge_cells("C4:F4")
+    portada["C4"].border = thick_top_border
+
+    # --- 3. Main Title ---
+    portada.row_dimensions[5].height = 30
+    portada.row_dimensions[6].height = 30
     portada.merge_cells("A5:H6")
     title_cell = portada["A5"]
     main_title = iget("titulo") or "INFORME DE SIMULACRO DE INSPECCION DE DEFENSA CIVIL EN EDIFICACIONES"
     set_cell_style(
         title_cell,
-        "INFORME DE SIMULACRO DE INSPECCIÓN DE DEFENSA CIVIL EN EDIFICACIONES",
+        main_title,
         bold=True,
-        size=14,
+        size=16,
         alignment=Alignment(horizontal="center", vertical="center", wrap_text=True)
     )
-    # Asegurar que el título final use el valor del infoproyecto si existe
-    try:
-        title_cell.value = main_title
-    except Exception:
-        pass
-    portada.row_dimensions[5].height = 45
-    portada.row_dimensions[6].height = 45
-    # Datos del proyecto: etiquetas y valores
+
+    # --- 4. Separator line after title ---
+    portada.row_dimensions[7].height = 15
+    portada.merge_cells("C7:F7")
+    portada["C7"].border = thick_top_border
+    
+    # --- 5. Space for image ---
+    portada.row_dimensions[8].height = 15
+    portada.merge_cells("B9:G18")
+    image_placeholder_cell = portada["B9"]
+    set_cell_style(
+        image_placeholder_cell,
+        "Espacio para imagen",
+        size=12,
+        alignment=Alignment(horizontal="center", vertical="center")
+    )
+    image_placeholder_cell.fill = PatternFill(start_color="E0E0E0", end_color="E0E0E0", fill_type="solid")
+    for row in range(9, 19):
+        portada.row_dimensions[row].height = 20
+
+
+    # --- 6. Project Details (better spaced) ---
     detail_rows = [
-        ("NOMBRE DEL ESTABLECIMIENTO:", info.get("nombre", "")),
-        ("PROPIETARIO:", info.get("propietario", "")),
-        ("DIRECCIÓN:", info.get("direccion", "")),
+        ("NOMBRE DEL ESTABLECIMIENTO:", iget("nombre del establecimiento", "nombre", "establecimiento")),
+        ("PROPIETARIO:", iget("propietario", "propietaria")),
+        ("DIRECCIÓN:", iget("direccion", "dirección")),
+        ("FECHA:", iget("fecha", "dia de la inspeccion")),
+        ("INSPECTORES:", iget("inspectores", "profesionales designados")),
     ]
-    start_row = 9
-    for label, value in detail_rows:
-        # Etiqueta en columnas B-D, alineada a la derecha
-        portada.merge_cells(start_row=start_row, start_column=2, end_row=start_row, end_column=4)
-        cell_label = portada.cell(row=start_row, column=2)
+    
+    start_row = 22 # Start details lower on the page
+    
+    # Distribute remaining space
+    available_rows = 48 - start_row
+    num_details = len(detail_rows)
+    row_increment = available_rows // (num_details + 1) if num_details > 0 else 2
+
+    for i, (label, value) in enumerate(detail_rows):
+        current_row = start_row + (i * row_increment)
+        portada.row_dimensions[current_row].height = 40
+
+        # Label
+        portada.merge_cells(start_row=current_row, start_column=2, end_row=current_row, end_column=4)
+        cell_label = portada.cell(row=current_row, column=2)
         set_cell_style(
             cell_label,
             label,
             bold=True,
+            size=12,
             alignment=Alignment(horizontal="right", vertical="center")
         )
-        # Valor en columnas E-G, alineado a la izquierda
-        portada.merge_cells(start_row=start_row, start_column=5, end_row=start_row, end_column=7)
-        cell_val = portada.cell(row=start_row, column=5)
+        # Value
+        portada.merge_cells(start_row=current_row, start_column=5, end_row=current_row, end_column=8)
+        cell_val = portada.cell(row=current_row, column=5)
         set_cell_style(
             cell_val,
             value,
+            size=12,
             alignment=Alignment(horizontal="left", vertical="center", wrap_text=True)
         )
-        # Ajustar altura de fila
-        portada.row_dimensions[start_row].height = 30
-        start_row += 2
-    # Reescribir valores con claves alternativas si están en el infoproyecto
-    try:
-        portada.cell(row=9, column=5).value = iget("nombre del establecimiento", "nombre", "establecimiento") or portada.cell(row=9, column=5).value
-        portada.cell(row=11, column=5).value = iget("propietario", "propietaria") or portada.cell(row=11, column=5).value
-        portada.cell(row=13, column=5).value = iget("direccion", "dirección") or portada.cell(row=13, column=5).value
-    except Exception:
-        pass
-    # Texto al pie de página con la ubicación y año (p. ej. LIMA‑2025)
-    footer_row = 19
+
+    # --- Footer ---
+    footer_row = 49
+    portada.row_dimensions[footer_row].height = 30
     portada.merge_cells(start_row=footer_row, start_column=1, end_row=footer_row, end_column=8)
     footer_cell = portada.cell(row=footer_row, column=1)
     set_cell_style(
         footer_cell,
-        "LIMA-2025",
+        "LIMA-2025", # This could also be dynamic from info
         bold=False,
         size=12,
         alignment=Alignment(horizontal="center", vertical="center")
     )
-    portada.row_dimensions[footer_row].height = 30
 
     # --------------------------------------------------------------------------
     # Hoja de datos generales
@@ -550,6 +528,7 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
         datos["B13"].value = iget("comentarios", "comentarios del proceso") or datos["B13"].value
     except Exception:
         pass
+
 
 def natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s[0])]
