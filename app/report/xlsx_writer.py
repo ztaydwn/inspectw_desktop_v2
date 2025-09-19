@@ -720,24 +720,26 @@ def export_groups_to_xlsx_report(
                             img = Image.open(io.BytesIO(img_data))
                             img = ImageOps.exif_transpose(img)
                             if img.mode in ("RGBA", "LA", "P"): img = img.convert("RGB")
-                            
-                            # No reducir la resolución. Insertar original y ajustar tamaño de visualización.
+
+                            # Optimización: Redimensionar y guardar como JPEG para reducir tamaño.
+                            max_px = 1200 # Tamaño máximo para el lado más largo de la imagen.
+                            img.thumbnail((max_px, max_px), Image.Resampling.LANCZOS)
+
                             cell_w_px = 229 # Ancho de celda (32 unidades) en píxeles
                             cell_h_px = 240 # Alto de celda (180 pt) en píxeles
-                            
+
                             # Calcular dimensiones de visualización manteniendo el aspect ratio
-                            # Dejar un pequeño margen para evitar desbordes
-                            margin = 4 
+                            margin = 4
                             ratio = min((cell_w_px - margin) / img.width, (cell_h_px - margin) / img.height)
                             display_width, display_height = int(img.width * ratio), int(img.height * ratio)
-                            
+
                             img_bytes = io.BytesIO()
-                            img.save(img_bytes, format='PNG') # Guardar original en buffer
+                            # Guardar como JPEG con calidad optimizada en lugar de PNG
+                            img.save(img_bytes, format='JPEG', quality=85, optimize=True)
                             img_bytes.seek(0)
                             img_excel = openpyxl.drawing.image.Image(img_bytes)
 
-                            # Asignar tamaño de visualización y anclar a la celda.
-                            # Este método es más compatible con versiones antiguas de openpyxl.
+                            # Asignar tamaño de visualización y anclar a la celda
                             img_excel.width = display_width
                             img_excel.height = display_height
                             img_excel.anchor = cell_pos
