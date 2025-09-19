@@ -93,7 +93,7 @@ def _create_group_lookup(txt_grupos: str) -> Dict[str, str]:
         if len(parts) == 2:
             key = parts[0].strip()
             # El valor ahora es la línea completa, para no perder la numeración
-            lookup[key] = full_line
+            lookup[key] = key + " " + parts[1].strip()
     return lookup
 
 def _parse_descriptions(txt_descriptions: str, group_lookup: Dict[str, str], archivos: Dict[str, bytes]) -> tuple[list[Foto], list[str]]:
