@@ -44,13 +44,10 @@ def parse_project_info_text(text: str) -> Dict[str, str]:
             key, value = line.split(":", 1)
             info[key.strip().lower()] = value.strip()
     return info
-def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: str = None) -> None:
-    """Agrega hojas iniciales independientes al ``Workbook``. Los valores se obtienen del archivo ``infoproyect.txt`` con formato ``clave: valor`` por línea. Si el archivo no existe, las celdas quedarán vacías y el resto del proceso no se verá afectado."""
-    # Permite pasar un dict ya parseado o una ruta a archivo
-    if isinstance(info_path, dict):
-        info = info_path
-    else:
-        info = read_project_info(info_path)
+
+
+def add_portada_sheet(wb: Workbook, info: Dict[str, str], logo_path: str | None = None) -> None:
+    """Agrega la hoja de portada al Workbook con logo, título y detalles del proyecto."""
     # Helper para obtener valores tolerando variaciones de clave
     def _norm_key(s: str) -> str:
         s = unicodedata.normalize('NFD', s or '')
@@ -65,16 +62,7 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
             if val:
                 return val
         return ""
-    # Preparar estilos locales (bordes y rellenos) para evitar referencias a
-    # variables externas como `gray_fill` o `thin_border` que sólo existen en
-    # otros contextos. Estos se usan para tablas en la hoja de desarrollo.
-    gray_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
-    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
-    thick_top_border = Border(top=Side(style='medium'))
 
-    # --------------------------------------------------------------------------
-    # Hoja de portada
-    # --------------------------------------------------------------------------
     portada = wb.create_sheet(title="PORTADA", index=0)
     portada.page_setup.orientation = portada.ORIENTATION_PORTRAIT
     portada.page_setup.paperSize = portada.PAPERSIZE_A4
@@ -106,7 +94,7 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
         logo_img = OpenpyxlImage(logo_path)
         logo_img.width = 210
         logo_img.height = 75
-        
+
         total_width_px = sum([(portada.column_dimensions[c].width * 7) + 5 for c in ["A", "B", "C", "D", "E", "F", "G", "H"]])
         x_offset_px = max(0, (total_width_px - logo_img.width) / 2)
         y_offset_px = pixels_to_EMU(15) # Small top margin
@@ -123,7 +111,7 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
     # --- 2. Separator line after logo ---
     portada.row_dimensions[4].height = 15
     portada.merge_cells("C4:F4")
-    portada["C4"].border = thick_top_border
+    portada["C4"].border = Border(top=Side(style='medium'))
 
     # --- 3. Main Title ---
     portada.row_dimensions[5].height = 30
@@ -142,8 +130,8 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
     # --- 4. Separator line after title ---
     portada.row_dimensions[7].height = 15
     portada.merge_cells("C7:F7")
-    portada["C7"].border = thick_top_border
-    
+    portada["C7"].border = Border(top=Side(style='medium'))
+
     # --- 5. Space for image ---
     portada.row_dimensions[8].height = 15
     portada.merge_cells("B9:G18")
@@ -158,7 +146,6 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
     for row in range(9, 19):
         portada.row_dimensions[row].height = 20
 
-
     # --- 6. Project Details (better spaced) ---
     detail_rows = [
         ("NOMBRE DEL ESTABLECIMIENTO:", iget("nombre del establecimiento", "nombre", "establecimiento")),
@@ -167,9 +154,9 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
         ("FECHA:", iget("fecha", "dia de la inspeccion")),
         ("INSPECTORES:", iget("inspectores", "profesionales designados")),
     ]
-    
+
     start_row = 22 # Start details lower on the page
-    
+
     # Distribute remaining space
     available_rows = 48 - start_row
     num_details = len(detail_rows)
@@ -212,12 +199,24 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
         alignment=Alignment(horizontal="center", vertical="center")
     )
 
-    # --------------------------------------------------------------------------
-    # Hoja de datos generales
-    # --------------------------------------------------------------------------
-    # Esta hoja reproduce la segunda página del informe donde se consignan los
-    # datos básicos de la inspección y antecedentes. Se organizan los textos en
-    # filas numeradas de acuerdo al formato.
+
+def add_datos_generales_sheet(wb: Workbook, info: Dict[str, str]) -> None:
+    """Agrega la hoja de datos generales al Workbook con información del proyecto."""
+    # Helper para obtener valores tolerando variaciones de clave
+    def _norm_key(s: str) -> str:
+        s = unicodedata.normalize('NFD', s or '')
+        s = ''.join(ch for ch in s if unicodedata.category(ch) != 'Mn')
+        s = s.lower()
+        s = re.sub(r'[^a-z0-9]+', ' ', s).strip()
+        return s
+    info_idx = {_norm_key(k): v for k, v in info.items()}
+    def iget(*names: str) -> str:
+        for n in names:
+            val = info_idx.get(_norm_key(n))
+            if val:
+                return val
+        return ""
+
     datos = wb.create_sheet(title="DATOS GENERALES", index=1)
     # Configuración de página A4
     datos.page_setup.orientation = datos.ORIENTATION_PORTRAIT
@@ -336,10 +335,27 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
         datos.row_dimensions[row_ptr].height = 20
         row_ptr += 1
 
-    # --------------------------------------------------------------------------
-    # Hoja de desarrollo del simulacro
-    # --------------------------------------------------------------------------
-    # Esta hoja reproduce el desglose de la visita técnica y las observaciones.
+    # ------------------------------------------------------------------
+    # Completar DATOS GENERALES con valores del infoproyecto si existen
+    # ------------------------------------------------------------------
+    try:
+        datos["B4"].value = iget("propietario", "propietaria") or datos["B4"].value
+        datos["B5"].value = iget("nombre del establecimiento", "nombre", "establecimiento") or datos["B5"].value
+        datos["B6"].value = iget("direccion", "dirección") or datos["B6"].value
+        datos["B7"].value = iget("fecha", "dia de la inspeccion", "día de la inspección") or datos["B7"].value
+        datos["B8"].value = iget("especialidad") or datos["B8"].value
+        datos["B9"].value = iget("inspectores", "profesionales designados") or datos["B9"].value
+        datos["B11"].value = iget("acompañamiento", "acompanamiento", "personal de acompañamiento") or datos["B11"].value
+        datos["B13"].value = iget("comentarios", "comentarios del proceso") or datos["B13"].value
+    except Exception:
+        pass
+
+
+def add_desarrollo_sheet(wb: Workbook) -> None:
+    """Agrega la hoja de desarrollo del simulacro al Workbook."""
+    gray_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+
     desarrollo = wb.create_sheet(title="DESARROLLO", index=2)
     # Configuración de página A4
     desarrollo.page_setup.orientation = desarrollo.ORIENTATION_PORTRAIT
@@ -514,20 +530,22 @@ def add_intro_sheets(wb: Workbook, info_path: str | Dict[str, str], logo_path: s
     desarrollo.row_dimensions[comentarios_row + 1].height = 25
     desarrollo.row_dimensions[comentarios_row + 2].height = 25
 
-    # ------------------------------------------------------------------
-    # Completar DATOS GENERALES con valores del infoproyecto si existen
-    # ------------------------------------------------------------------
-    try:
-        datos["B4"].value = iget("propietario", "propietaria") or datos["B4"].value
-        datos["B5"].value = iget("nombre del establecimiento", "nombre", "establecimiento") or datos["B5"].value
-        datos["B6"].value = iget("direccion", "dirección") or datos["B6"].value
-        datos["B7"].value = iget("fecha", "dia de la inspeccion", "día de la inspección") or datos["B7"].value
-        datos["B8"].value = iget("especialidad") or datos["B8"].value
-        datos["B9"].value = iget("inspectores", "profesionales designados") or datos["B9"].value
-        datos["B11"].value = iget("acompañamiento", "acompanamiento", "personal de acompañamiento") or datos["B11"].value
-        datos["B13"].value = iget("comentarios", "comentarios del proceso") or datos["B13"].value
-    except Exception:
-        pass
+
+def add_intro_sheets_wrapper(wb: Workbook, info_path: str | Dict[str, str], logo_path: str | None = None) -> None:
+    """Agrega hojas iniciales independientes al ``Workbook``. Los valores se obtienen del archivo ``infoproyect.txt`` con formato ``clave: valor`` por línea. Si el archivo no existe, las celdas quedarán vacías y el resto del proceso no se verá afectado."""
+    # Permite pasar un dict ya parseado o una ruta a archivo
+    if isinstance(info_path, dict):
+        info = info_path
+    else:
+        info = read_project_info(info_path)
+
+    add_portada_sheet(wb, info, logo_path)
+    add_datos_generales_sheet(wb, info)
+    add_desarrollo_sheet(wb)
+
+
+# Backward compatibility alias
+add_intro_sheets = add_intro_sheets_wrapper
 
 
 def natural_sort_key(s):
@@ -572,39 +590,13 @@ def estimate_visual_lines(text: str, chars_per_line: int) -> int:
         total_lines += math.ceil(len(line_segment) / chars_per_line) if line_segment else 1
     return total_lines
 
-def export_groups_to_xlsx_report(
-    grupos: Dict[str, Grupo],
-    archivos: Dict[str, bytes],
-    output_xlsx_path: str,
-    progress_callback=None,
-    info_path: str = os.path.join("datos", "infoproyect.txt"),
-    control_documents=None,
-    conclusiones: list[str] | None = None,
-    ) -> None:
-    wb = Workbook()
-    wb.remove(wb.active)  # Remove default sheet
 
-    # Agregar hojas independientes iniciales
-    # Intentar leer 'infoproyect.txt' desde los archivos cargados (ZIP/carpeta)
-    info_from_archivos = None
-    try:
-        for k, v in archivos.items():
-            base = os.path.basename(k).lower()
-            if base.startswith('infoproyect') and base.endswith('.txt'):
-                try:
-                    info_from_archivos = parse_project_info_text(v.decode('utf-8', errors='ignore'))
-                    break
-                except Exception:
-                    pass
-    except Exception:
-        pass
-    add_intro_sheets(wb, info_from_archivos if info_from_archivos else info_path, logo_path="datos/portadat.png")
-
+def add_group_sheets(wb: Workbook, grupos: Dict[str, Grupo], archivos: Dict[str, bytes], progress_callback=None) -> None:
+    """Agrega hojas para cada grupo con fotos, detalles y recomendaciones."""
     # Define styles
     header_font = Font(bold=True, size=12)
     gray_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
     green_fill = PatternFill(start_color="E2F0D9", end_color="E2F0D9", fill_type="solid")
-    red_fill = PatternFill(start_color="F8CBAD", end_color="F8CBAD", fill_type="solid")
     thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
 
     # Natural sort for group names
@@ -617,7 +609,7 @@ def export_groups_to_xlsx_report(
         sanitized_gname = gname
         for char in invalid_chars:
             sanitized_gname = sanitized_gname.replace(char, '-')
-        
+
         sheet_name = sanitized_gname[:31]  # Sheet name limit is 31 chars
         ws = wb.create_sheet(title=sheet_name)
 
@@ -657,13 +649,13 @@ def export_groups_to_xlsx_report(
         ws.merge_cells('A2:C2')
         title_cell = ws['A2']
         set_cell_style(title_cell, gname, bold=True, size=12)
-        
+
         title_cell.alignment = Alignment(wrap_text=True, vertical='center', horizontal='left')
-        
+
         # Ajustar cálculo de líneas al nuevo ancho total (aprox 90 chars)
         text_lines = len(gname) // 90 + 1
         ws.row_dimensions[2].height = max(25, text_lines * 20)
-        
+
         apply_border_to_range(ws, 'A2', 'C2')
 
         # --- Photo section header ---
@@ -671,7 +663,7 @@ def export_groups_to_xlsx_report(
         set_cell_style(ws['A3'], "FOTOGRAFÍAS:", bold=True, size=12, alignment=Alignment(horizontal='left', vertical='center'))
         ws['A3'].font = header_font
         apply_border_to_range(ws, 'A3', 'C3')
-        
+
         # --- Photo file names ---
         cols, rows = 3, 2
         per_page = cols * rows
@@ -680,11 +672,11 @@ def export_groups_to_xlsx_report(
 
         # Ancho de celda aprox 230px con el nuevo ancho de columna
         image_cell_height_px = 240
-        
+
         current_row = 4
         for page in range(pages):
             chunk = grupo.fotos[page * per_page:(page + 1) * per_page]
-            
+
             # Procesar cada fila de fotos y añadir una fila de etiquetas debajo
             for r in range(rows):
                 photo_row_idx = current_row + (r * 2)
@@ -701,20 +693,20 @@ def export_groups_to_xlsx_report(
                     idx_global = page * per_page + chunk_idx + 1
                     foto = chunk[chunk_idx]
                     cell_pos = f"{get_column_letter(c + 1)}{photo_row_idx}"
-                    
+
                     possible_paths = [
                         f"{foto.carpeta}/{foto.filename}",
                         f"{foto.carpeta}\\{foto.filename}",
                         foto.filename,
                         f"{foto.carpeta.replace('/', '')}\\{foto.filename}"
                     ]
-                    
+
                     img_data = None
                     for path in possible_paths:
                         img_data = archivos.get(path)
                         if img_data:
                             break
-                    
+
                     if img_data:
                         try:
                             img = Image.open(io.BytesIO(img_data))
@@ -754,7 +746,7 @@ def export_groups_to_xlsx_report(
                             ws[cell_pos] = f"{foto.carpeta}/{foto.filename}"
                     else:
                         ws[cell_pos] = f"{foto.carpeta}/{foto.filename}"
-            
+
             # Incrementar el puntero de fila para la siguiente página
             current_row += rows * 2 # 2 filas por cada fila de fotos (foto + etiqueta)
             if page < pages - 1:
@@ -774,7 +766,7 @@ def export_groups_to_xlsx_report(
             full_detail = foto.specific_detail
             detail_after_plus = full_detail.split('+', 1)[1].strip() if '+' in full_detail else full_detail
             entradas.append((detail_after_plus, f"{foto.carpeta} [Foto {i}]")) # Usar el índice global
-            
+
         oraciones = agrupa_y_redacta(entradas, umbral_similitud=0.8)
         details_text = "\n".join(f"{i}. {sentencia}" for i, sentencia in enumerate(oraciones, start=1))
 
@@ -827,9 +819,13 @@ def export_groups_to_xlsx_report(
             progress_percentage = int(((idx + 1) / total_grupos) * 100)
             progress_callback.emit(progress_percentage)
 
-    # ------------------------------------------------------------------
-    # 5. CONTROL DE DOCUMENTACIÓN DE SEGURIDAD (Hojas finales opcionales)
-    # ------------------------------------------------------------------
+def add_control_documents_sheets(wb: Workbook, control_documents=None, conclusiones: list[str] | None = None) -> None:
+    """Agrega hojas de control de documentación de seguridad al Workbook."""
+    gray_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+    green_fill = PatternFill(start_color="E2F0D9", end_color="E2F0D9", fill_type="solid")
+    red_fill = PatternFill(start_color="F8CBAD", end_color="F8CBAD", fill_type="solid")
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+
     def _add_control_docs_sheet(wb: Workbook, page_title: str, items_slice: list[tuple[int, str, str]]):
         ws = wb.create_sheet(title=page_title)
         # Configuración de página: A4, orientación vertical, 1 página de ancho y alto, márgenes estrechos
@@ -998,5 +994,40 @@ def export_groups_to_xlsx_report(
                 set_cell_style(ws.cell(row=row, column=1), f"{i}. {txt}", size=10, alignment=Alignment(wrap_text=True, vertical='top'))
                 ws.row_dimensions[row].height = 18 * max(2, estimate_visual_lines(txt, 90))
                 row += 1
+
+
+def export_groups_to_xlsx_report(
+    grupos: Dict[str, Grupo],
+    archivos: Dict[str, bytes],
+    output_xlsx_path: str,
+    progress_callback=None,
+    info_path: str = os.path.join("datos", "infoproyect.txt"),
+    control_documents=None,
+    conclusiones: list[str] | None = None,
+    ) -> None:
+    wb = Workbook()
+    wb.remove(wb.active)  # Remove default sheet
+
+    # Agregar hojas independientes iniciales
+    # Intentar leer 'infoproyect.txt' desde los archivos cargados (ZIP/carpeta)
+    info_from_archivos = None
+    try:
+        for k, v in archivos.items():
+            base = os.path.basename(k).lower()
+            if base.startswith('infoproyect') and base.endswith('.txt'):
+                try:
+                    info_from_archivos = parse_project_info_text(v.decode('utf-8', errors='ignore'))
+                    break
+                except Exception:
+                    pass
+    except Exception:
+        pass
+    add_intro_sheets(wb, info_from_archivos if info_from_archivos else info_path, logo_path="datos/portadat.png")
+
+    # Agregar hojas de grupos
+    add_group_sheets(wb, grupos, archivos, progress_callback)
+
+    # Agregar hojas de control de documentos
+    add_control_documents_sheets(wb, control_documents, conclusiones)
 
     wb.save(output_xlsx_path)
