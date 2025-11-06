@@ -36,19 +36,13 @@ def add_portada_sheet(wb: Workbook, info: Dict[str, str], logo_path: str | None 
     portada.page_margins.top = 0.25
     portada.page_margins.bottom = 0.25
 
-    # Configurar anchos de columna más apropiados
-    portada.column_dimensions["A"].width = 3
-    portada.column_dimensions["B"].width = 15
-    portada.column_dimensions["C"].width = 15
-    portada.column_dimensions["D"].width = 15
-    portada.column_dimensions["E"].width = 15
-    portada.column_dimensions["F"].width = 15
-    portada.column_dimensions["G"].width = 15
-    portada.column_dimensions["H"].width = 3
+    # Configurar anchos de columna: cada una debe medir exactamente 10.29 unidades de Excel (77 píxeles)
+    for col in ["A", "B", "C", "D", "E", "F", "G", "H"]:
+        portada.column_dimensions[col].width = 10.29
 
     # Aplicar color de fondo gris claro a toda la hoja
     light_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
-    for row in range(1, 50):  # Cubrir toda la página
+    for row in range(1, 40):  # Cubrir toda la página
         for col_idx in range(1, 9):
             cell = portada.cell(row=row, column=col_idx)
             cell.fill = light_fill
@@ -82,37 +76,24 @@ def add_portada_sheet(wb: Workbook, info: Dict[str, str], logo_path: str | None 
         logo_img.anchor = AbsoluteAnchor(pos=pos, ext=size)
         portada.add_image(logo_img)
 
-    # --- 2. Main Title (más grande y mejor posicionado) ---
+    # --- 2. Espacio para imagen (más grande y mejor ubicado) ---
     portada.row_dimensions[8].height = 25
     portada.row_dimensions[9].height = 25
     portada.row_dimensions[10].height = 25
     portada.row_dimensions[11].height = 25
-
-    portada.merge_cells("B8:G11")
-    title_cell = portada["B8"]
-    main_title = iget("titulo") or "INFORME DE SIMULACRO DE INSPECCION DE DEFENSA CIVIL EN EDIFICACIONES"
-    set_cell_style(
-        title_cell,
-        main_title,
-        bold=True,
-        size=18,  # Tamaño de fuente más grande
-        alignment=Alignment(horizontal="center", vertical="center", wrap_text=True)
-    )
-
-    # --- 3. Espacio para imagen (más grande y mejor ubicado) ---
+    portada.row_dimensions[12].height = 25
     portada.row_dimensions[13].height = 25
     portada.row_dimensions[14].height = 25
     portada.row_dimensions[15].height = 25
     portada.row_dimensions[16].height = 25
     portada.row_dimensions[17].height = 25
-    portada.row_dimensions[18].height = 25
-    portada.row_dimensions[19].height = 25
-    portada.row_dimensions[20].height = 25
-    portada.row_dimensions[21].height = 25
-    portada.row_dimensions[22].height = 25
 
-    portada.merge_cells("B13:G22")
-    image_placeholder_cell = portada["B13"]
+    # Borde superior grueso negro sobre el espacio para imagen
+    for col in ["B", "C", "D", "E", "F", "G"]:
+        portada[f"{col}7"].border = Border(top=Side(style='medium', color='000000'))
+
+    portada.merge_cells("B8:G17")
+    image_placeholder_cell = portada["B8"]
     set_cell_style(
         image_placeholder_cell,
         "ESPACIO PARA IMAGEN",
@@ -122,13 +103,30 @@ def add_portada_sheet(wb: Workbook, info: Dict[str, str], logo_path: str | None 
     )
     image_placeholder_cell.fill = PatternFill(start_color="D3D3D3", end_color="D3D3D3", fill_type="solid")
 
+    # --- 3. Main Title (debajo del espacio para imagen, tamaño 14, 2 celdas de altura) ---
+    portada.row_dimensions[19].height = 25
+    portada.row_dimensions[20].height = 25
+
+    portada.merge_cells("B19:G20")
+    title_cell = portada["B19"]
+    main_title = iget("titulo") or "INFORME DE SIMULACRO DE INSPECCION DE DEFENSA CIVIL EN EDIFICACIONES"
+    set_cell_style(
+        title_cell,
+        main_title,
+        bold=True,
+        size=14,  # Tamaño de fuente 14 como especificaste
+        alignment=Alignment(horizontal="center", vertical="center", wrap_text=True)
+    )
+
+    # Borde inferior grueso negro debajo del título principal
+    for col in ["B", "C", "D", "E", "F", "G"]:
+        portada[f"{col}21"].border = Border(bottom=Side(style='medium', color='000000'))
+
     # --- 4. Project Details (mejor espaciados y posicionados) ---
     detail_rows = [
         ("NOMBRE DEL ESTABLECIMIENTO:", iget("nombre del establecimiento", "nombre", "establecimiento")),
         ("PROPIETARIO:", iget("propietario", "propietaria")),
         ("DIRECCIÓN:", iget("direccion", "dirección")),
-        ("FECHA:", iget("fecha", "dia de la inspeccion")),
-        ("INSPECTORES:", iget("inspectores", "profesionales designados")),
     ]
 
     start_row = 25  # Comenzar más abajo en la página
@@ -160,7 +158,7 @@ def add_portada_sheet(wb: Workbook, info: Dict[str, str], logo_path: str | None 
         )
 
     # --- Footer (mejor posicionado) ---
-    footer_row = 45
+    footer_row = 37
     portada.row_dimensions[footer_row].height = 25
     portada.merge_cells(start_row=footer_row, start_column=1, end_row=footer_row, end_column=8)
     footer_cell = portada.cell(row=footer_row, column=1)
