@@ -27,6 +27,7 @@ class Foto:
     group_name: str      # El nombre oficial del grupo desde grupos.txt
     specific_detail: str # La pregunta/detalle específico de descriptions.txt
     carpeta: str
+    recommendation: str = ""  # Recomendación específica de descriptions.txt
     path_tmp: str | None = None
 
 @dataclass
@@ -99,65 +100,87 @@ def _create_group_lookup(txt_grupos: str) -> Dict[str, str]:
 def _parse_descriptions(txt_descriptions: str, group_lookup: Dict[str, str], archivos: Dict[str, bytes]) -> tuple[list[Foto], list[str]]:
     """
     Parsea descriptions.txt, empareja fotos de forma robusta y asigna el nombre oficial del grupo.
-    
+
     Retorna una tupla: (lista de fotos encontradas, lista de advertencias).
     """
     fotos = []
     warnings = []
-    bloque = {}
+    current_block = None
 
-    for line_num, line in enumerate(txt_descriptions.splitlines(), 1):
-        line = line.strip()
+    lines = txt_descriptions.splitlines()
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        line_num = i + 1
         m = re.match(r'\[(.+?)\]\s+(\S+\.jpg)', line, flags=re.I)
         if m:
-            # Si había un bloque anterior sin descripción, se descarta.
-            bloque = {"carpeta": m.group(1), "filename": m.group(2)}
-        elif line.lower().startswith("description:") and bloque:
+            # Si había un bloque anterior, procesarlo
+            if current_block and 'description' in current_block:
+                fotos.append(_create_foto_from_block(current_block, group_lookup, archivos, warnings, line_num))
+            current_block = {"carpeta": m.group(1), "filename": m.group(2), "description": "", "recommendation": ""}
+        elif line.lower().startswith("description:") and current_block:
             desc_content = line.split(":", 1)[1].strip()
-            
             desc_parts = re.split(r'\s+', desc_content, 1)
             numbering_code = desc_parts[0].strip()
             specific_detail = desc_parts[1].strip() if len(desc_parts) > 1 else ''
-            
-            official_group_name = group_lookup.get(numbering_code, f"Grupo no encontrado para '{numbering_code}'")
+            current_block["description"] = specific_detail
+            current_block["numbering_code"] = numbering_code
+            # Check next line for recommendation
+            if i + 1 < len(lines):
+                next_line = lines[i + 1].strip()
+                if next_line.lower().startswith("recommendation:"):
+                    current_block["recommendation"] = next_line.split(":", 1)[1].strip()
+                    i += 1  # Skip the recommendation line
+        i += 1
 
-            # --- Lógica de emparejamiento robusto ---
-            filename_from_desc = bloque["filename"]
-            carpeta_from_desc = bloque["carpeta"]
-            
-            # Intento 1: Ruta ideal (carpeta/archivo.jpg)
-            ideal_path = f"{carpeta_from_desc}/{filename_from_desc}"
-            if ideal_path not in archivos:
-                # Intento 2: Fallback - buscar solo por nombre de archivo
-                matches = [path for path in archivos if os.path.basename(path) == filename_from_desc]
-                if len(matches) == 1:
-                    # Éxito: se encontró una única coincidencia. Se corrige la carpeta.
-                    carpeta_from_desc = os.path.dirname(matches[0]).replace('\\', '/')
-                elif len(matches) > 1:
-                    warnings.append(f"Línea {line_num}: Nombre de archivo '{filename_from_desc}' es ambiguo (encontrado en {len(matches)} ubicaciones). Se omitió la foto.")
-                    bloque = {}
-                    continue
-                else:
-                    warnings.append(f"Línea {line_num}: No se encontró la foto '{filename_from_desc}' en ninguna carpeta.")
-                    bloque = {}
-                    continue
-            
-            fotos.append(Foto(
-                filename=filename_from_desc,
-                group_name=official_group_name,
-                specific_detail=specific_detail,
-                carpeta=carpeta_from_desc, # Usar la carpeta corregida si fue necesario
-            ))
-            bloque = {}
+    # Process last block
+    if current_block and 'description' in current_block:
+        fotos.append(_create_foto_from_block(current_block, group_lookup, archivos, warnings, len(lines)))
+
     return fotos, warnings
 
+def _create_foto_from_block(block: dict, group_lookup: Dict[str, str], archivos: Dict[str, bytes], warnings: list[str], line_num: int) -> Foto | None:
+    """Helper to create Foto from parsed block."""
+    filename_from_desc = block["filename"]
+    carpeta_from_desc = block["carpeta"]
+    numbering_code = block.get("numbering_code", "")
+    specific_detail = block["description"]
+    recommendation = block["recommendation"]
+
+    official_group_name = group_lookup.get(numbering_code, f"Grupo no encontrado para '{numbering_code}'")
+
+    # --- Lógica de emparejamiento robusto ---
+    # Intento 1: Ruta ideal (carpeta/archivo.jpg)
+    ideal_path = f"{carpeta_from_desc}/{filename_from_desc}"
+    if ideal_path not in archivos:
+        # Intento 2: Fallback - buscar solo por nombre de archivo
+        matches = [path for path in archivos if os.path.basename(path) == filename_from_desc]
+        if len(matches) == 1:
+            # Éxito: se encontró una única coincidencia. Se corrige la carpeta.
+            carpeta_from_desc = os.path.dirname(matches[0]).replace('\\', '/')
+        elif len(matches) > 1:
+            warnings.append(f"Línea {line_num}: Nombre de archivo '{filename_from_desc}' es ambiguo (encontrado en {len(matches)} ubicaciones). Se omitió la foto.")
+            return None
+        else:
+            warnings.append(f"Línea {line_num}: No se encontró la foto '{filename_from_desc}' en ninguna carpeta.")
+            return None
+
+    return Foto(
+        filename=filename_from_desc,
+        group_name=official_group_name,
+        specific_detail=specific_detail,
+        carpeta=carpeta_from_desc,
+        recommendation=recommendation
+    )
+
 def asignar_recomendaciones(grupos: Dict[str, Grupo], engine: RecommendationEngine, top_k: int = 1):
-    """Rellena grupo.recomendaciones usando el motor."""
+    """Rellena grupo.recomendaciones usando el motor, solo si no hay recomendaciones de descriptions.txt."""
     for g in grupos.values():
-        # Usa descripción base + agregación de detalles/ubicaciones para contextualizar la consulta
-        extra = ", ".join(sorted({f"{f.carpeta} {f.specific_detail}".strip() for f in g.fotos if f.specific_detail or f.carpeta}))[:400]
-        sugerencias = engine.suggest(query=g.descripcion, extra_text=extra, top_k=top_k)
-        g.recomendaciones = [rec for _, rec in sugerencias] or g.recomendaciones
+        if not g.recomendaciones:  # Solo asignar si no hay recomendaciones de descriptions.txt
+            # Usa descripción base + agregación de detalles/ubicaciones para contextualizar la consulta
+            extra = ", ".join(sorted({f"{f.carpeta} {f.specific_detail}".strip() for f in g.fotos if f.specific_detail or f.carpeta}))[:400]
+            sugerencias = engine.suggest(query=g.descripcion, extra_text=extra, top_k=top_k)
+            g.recomendaciones = [rec for _, rec in sugerencias] or g.recomendaciones
 
 def procesar_zip(archivos: Dict[str, bytes], hist_path: str | None = None) -> tuple[Dict[str, Grupo], str | None]:
     # Leer ambos archivos de texto del zip
@@ -176,8 +199,11 @@ def procesar_zip(archivos: Dict[str, bytes], hist_path: str | None = None) -> tu
         # Agrupar por el nombre oficial del grupo
         g = grupos.setdefault(f.group_name, Grupo(descripcion=f.group_name))
         g.fotos.append(f)
-    
-    # Cargar histórico y asignar recomendaciones    
+        # Collect recommendations from descriptions.txt
+        if f.recommendation:
+            g.recomendaciones.append(f.recommendation)
+
+    # Cargar histórico y asignar recomendaciones solo si no hay de descriptions.txt
     error_msg = None
     try:
         hp = hist_path or HIST_DEFAULT

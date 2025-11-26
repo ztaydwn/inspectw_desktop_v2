@@ -1,0 +1,538 @@
+[CTO DE BOMBAS] 20251119_174731_3.1.12_Las_cajas_de_paso_tienen_tapa_hay_cajas_de__8ec48d.jpg
+  Description: 3.1.12	Las cajas de paso tienen tapa? + hay cajas de paso sin tapa
+
+[CTO DE BOMBAS] 20251119_174706_3.1.7_Las_carcazas_de_los_equipos_electricos_como__6b119f.jpg
+  Description: 3.1.7	Las carcazas de los equipos electricos, como  racks de servidores, UPS, transformadores, estabilizadores, aires acondiconados, bombas, estan conectados al circuito a tierra? (no considerar a los tableros electricos) + el motor del ascensor no tiene puesta tierra
+
+[CTO DE BOMBAS] 20251119_174647_1.4.1_Tiene_detector_de_humo_operativo_no_posee_de_c9462c.jpg
+  Description: 1.4.1	Tiene detector de humo operativo? + no posee detector de uno
+
+[CTO DE BOMBAS] 20251119_174632_1.1.4_Tiene_luces_de_emergencia_operativa_e_ininte_5a608b.jpg
+  Description: 1.1.4	Tiene luces de emergencia operativa e ininterrumpida? + luz de emergencia inoperativa
+
+[CTO DE BOMBAS] 20251119_174614_1.1.3_Posee_en_el_ingreso_la_sealetica_fotoluminis_3e7e8a.jpg
+  Description: 1.1.3	Posee en el ingreso la señaletica fotoluminiscente de RIESGO ELECTRICO, NO INGRESAR Y USO EPP? + la señal de riesgo eléctrico no es fotoluminiscente
+
+[TABLERO T-ASC] 20251119_174446_3.3.10_Existe_iluminacin_general_y_de_emergencia_e_9181de.jpg
+  Description: 3.3.10	Existe iluminación general y de emergencia en la zona de ubicación de los tableros eléctricos? + la luz de emergencia no se encuentra operativa
+
+[TABLERO T-ASC] 20251119_174425_3.3.9_Existe_espacio_libre_no_menor_a_un_metro_fre_5de13e.jpg
+  Description: 3.3.9	Existe espacio libre no menor a un metro frente a los tableros eléctricos? + frente al tablero se encuentra el motor del ascensor
+
+[TABLERO T-ASC] 20251119_174241_3.1.1_El_tablero_elctrico_de_material_metlico_est__e05ec1.jpg
+  Description: 3.1.1	El tablero eléctrico de material metálico está conectado a tierra? + falta señalizar puntos a tierra
+
+[TABLERO T-ASC] 20251119_174216_1.2.6_Los_ITM_DIF_u_otros_accesorios_cuenta_con_te_5fd1ca.jpg
+  Description: 1.2.6	Los ITM, DIF u otros accesorios cuenta con terminales? + los circuitos no tienen diferenciales aguas abajo
+
+[TABLERO T-ASC] 20251119_173717_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_e6e628.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + falta mantenimiento y limpieza
+
+[TABLERO T-ASC] 20251119_173635_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_3559c3.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + no tienen señalética fotoluminiscente en los tres tableros
+
+[CLOSET ELECTRICO 4] 20251119_172843_3.1.11_Hay_cables_expuestos_o_canaletas_sueltas_ha_ab48cd.jpg
+  Description: 3.1.11	Hay cables expuestos o canaletas sueltas? + hay cables sueltos solo aislados con cinta
+
+[CLOSET ELECTRICO 4] 20251119_172828_3.1.11_Hay_cables_expuestos_o_canaletas_sueltas_ha_a166b6.jpg
+  Description: 3.1.11	Hay cables expuestos o canaletas sueltas? + hay cables expuestos por el sistema de paneles solares
+
+[CLOSET ELECTRICO 4] 20251119_172744_3.1.11_Hay_cables_expuestos_o_canaletas_sueltas_ha_7a2707.jpg
+  Description: 3.1.11	Hay cables expuestos o canaletas sueltas? + hay tuberías PVC expuestas saliendo de la bandeja Porta cables
+
+[CLOSET ELECTRICO 4] 20251119_172724_3.1.7_Las_carcazas_de_los_equipos_electricos_como__178825.jpg
+  Description: 3.1.7	Las carcazas de los equipos electricos, como  racks de servidores, UPS, transformadores, estabilizadores, aires acondiconados, bombas, estan conectados al circuito a tierra? (no considerar a los tableros electricos) + tanto el estabilizador como el transformador en sus carcasas no tienen punto a tierra
+
+[CLOSET ELECTRICO 4] 20251119_172700_2.3.1_En_los_techos_muros_columnas_o_pisos_hay_raj_b6b173.jpg
+  Description: 2.3.1	En los techos, muros, columnas o pisos hay rajaduras o deformaciones? + hay una fisura en la pared en la esquina
+
+[CLOSET ELECTRICO 4] 20251119_172632_1.3.2_Posee_extintor_cerca_para_fuego_tipo_C_no_po_54df80.jpg
+  Description: 1.3.2	Posee extintor cerca para fuego tipo C? + no posee ningún extintor CO2 a menos de 3 m
+
+[CLOSET ELECTRICO 4] 20251119_172610_1.2.5_Hay_extensiones_o_adaptadores_se_encontr_uso_2fd91f.jpg
+  Description: 1.2.5	Hay extensiones o adaptadores? + se encontró uso de extensión
+  Recommendation: retirar cualquier extensión o adaptador
+
+[CLOSET ELECTRICO 4] 20251119_172542_1.1.3_Posee_en_el_ingreso_la_sealetica_fotoluminis_48badf.jpg
+  Description: 1.1.3	Posee en el ingreso la señaletica fotoluminiscente de RIESGO ELECTRICO, NO INGRESAR Y USO EPP? + la señalética de no ingresar y uso el PP no es fotoluminiscente
+
+[TABLERO T-DC] 20251119_172427_3.3.10_Existe_iluminacin_general_y_de_emergencia_e_ea807b.jpg
+  Description: 3.3.10	Existe iluminación general y de emergencia en la zona de ubicación de los tableros eléctricos? + la luz de emergencia existente no llega a alumbrar el tablero porque está muy lejana
+  Recommendation: instalar otra luz de emergencia sobre el tablero o frente a él
+
+[TABLERO T-DC] 20251119_172348_3.3.9_Existe_espacio_libre_no_menor_a_un_metro_fre_f058e3.jpg
+  Description: 3.3.9	Existe espacio libre no menor a un metro frente a los tableros eléctricos? + frente al tablero hay un transformador
+
+[TABLERO T-DC] 20251119_172322_3.3.8_Los_circuitos_se_encuentran_debidamente_rotu_65a5fd.jpg
+  Description: 3.3.8	Los circuitos se encuentran debidamente rotulados? + los circuitos no están rotulados
+
+[TABLERO T-DC] 20251119_172305_3.3.8_Tiene_directorio_de_los_circuitos_indicando__0f3403.jpg
+  Description: 3.3.8	Tiene directorio de los circuitos, indicando de manera visible y clara la instalación que controla? + no posee directorio
+
+[TABLERO T-DC] 20251119_172225_3.1.4_Todos_los_circuitos_elctricos_tienen_protecc_94565f.jpg
+  Description: 3.1.4	Todos los circuitos eléctricos tienen protección de interruptores diferenciales? + no posee diferencial
+  Recommendation: colocar una diferencial de 4 x 25
+
+[TABLERO T-DC] 20251119_172148_3.1.2_El_tablero_cuenta_con_placa_de_proteccin_man_eb56cb.jpg
+  Description: 3.1.2	El tablero cuenta con placa de protección (mandil)? + el mandil de acrílico no tiene apertura para la llave general
+
+[TABLERO T-DC] 20251119_172115_3.1.1_El_tablero_elctrico_de_material_metlico_est__980e25.jpg
+  Description: 3.1.1	El tablero eléctrico de material metálico está conectado a tierra? + los puntos a tierra de la carcasa no están conectados a la barra y potencial
+  Recommendation: Conectar a la barra equipotencial los puntos a tierra
+
+[TABLERO T-DC] 20251119_171950_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_e761e3.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + falta mantenimiento y limpieza
+
+[TABLERO T-DC] 20251119_171934_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_643993.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + la señal de riesgo eléctrico no es fotoluminiscente
+  Recommendation: cambiar señalética a fotoluminiscente
+
+[TABLERO TD-4] 20251119_171804_3.3.9_Existe_espacio_libre_no_menor_a_un_metro_fre_74b3ee.jpg
+  Description: 3.3.9	Existe espacio libre no menor a un metro frente a los tableros eléctricos? + frente al tablero hay un estabilizador qué bloquea su acceso libre
+  Recommendation: reubicar estabilizador
+
+[TABLERO TD-4] 20251119_171703_3.1.17_Los_diagramas_unifilares_concuerdan_con_lo__6e833a.jpg
+  Description: 3.1.17	Los diagramas unifilares concuerdan con lo verificado físicamente? + diagrama unifilar difiere un poco de la realidad
+
+[TABLERO TD-4] 20251119_171609_3.1.1_El_tablero_elctrico_de_material_metlico_est__79a19f.jpg
+  Description: 3.1.1	El tablero eléctrico de material metálico está conectado a tierra? + los puntos a tierra no están señalizados
+
+[TABLERO TD-4] 20251119_171525_1.2.6_Los_ITM_DIF_u_otros_accesorios_cuenta_con_te_124ef6.jpg
+  Description: 1.2.6	Los ITM, DIF u otros accesorios cuenta con terminales? + hay varias diferenciales que no están utilizando terminales aguas abajo no se puede revisar bien porque hay papel cinta más que entre los circuitos
+  Recommendation: colocar terminales a todos los circuitos
+
+[TABLERO TD-4] 20251119_171439_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_065b74.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + los circuitos c1 C2 C3 y c4 tienen doble hasta triple salida de cables
+  Recommendation: todos los empalmes para luces de emergencia deben realizarse fuera del tablero en una caja de pase.
+
+[TABLERO TD-4] 20251119_171213_1.2.2_Cuenta_con_ITM_que_corresponden_a_la_capacid_ce5a83.jpg
+  Description: 1.2.2	Cuenta con ITM que corresponden a la capacidad de corriente de los conductores eléctricos que protege? + el circuito c4 es de 20 amperios y utiliza cable de 2.5 mm2
+  Recommendation: cambiar cable a 4 mm2
+
+[TABLERO TD-4] 20251119_171026_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_4b6622.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + falta mantenimiento y limpieza
+
+[TABLERO TD-4] 20251119_171000_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_d3eb34.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + la señal de riesgo eléctrico no es fotoluminiscente
+  Recommendation: cambiar señalética a fotoluminiscente
+
+[TABLERO TS-4] 20251119_165707_3.3.8_Los_circuitos_se_encuentran_debidamente_rotu_3d548d.jpg
+  Description: 3.3.8	Los circuitos se encuentran debidamente rotulados? + en circuito C-12 no está rotulado
+  Recommendation: colocar rótulo a circuito mencionado
+
+[TABLERO TS-4] 20251119_165620_3.1.17_Los_diagramas_unifilares_concuerdan_con_lo__e26a28.jpg
+  Description: 3.1.17	Los diagramas unifilares concuerdan con lo verificado físicamente? + diagrama unifilar no concuerda con la realidad
+
+[TABLERO TS-4] 20251119_165547_3.1.4_Todos_los_circuitos_elctricos_tienen_protecc_e2b05f.jpg
+  Description: 3.1.4	Todos los circuitos eléctricos tienen protección de interruptores diferenciales? + el circuito c12 no tiene diferencial y no se sabe que alimenta
+  Recommendation: se debe colocar una diferencial para el circuito 12 de 4x25 amperios, a excepción de qué al esté alimentando un tablero eléctrico
+
+[TABLERO TS-4] 20251119_165407_1.2.6_Las_fases_de_los_circuitos_estn_diferenciado_a3d5b4.jpg
+  Description: 1.2.6	Las fases de los circuitos están diferenciados por colores o rotulados? + la acometida principal hacia el tablero no está diferenciada por colores sus fases
+
+[TABLERO TS-4] 20251119_165308_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_0f3027.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + los circuitos c8 c9 y c11 tienen doble salida de cables
+
+[TABLERO TS-4] 20251119_165213_1.2.2_Cuenta_con_ITM_que_corresponden_a_la_capacid_1e2e05.jpg
+  Description: 1.2.2	Cuenta con ITM que corresponden a la capacidad de corriente de los conductores eléctricos que protege? + la acometida principal del tablero es de 10 mm2 pero la llave general es regulable de 50 a 63 amperios
+  Recommendation: cambiar cable a 16mm2
+
+[TABLERO TS-4] 20251119_164850_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_28b34a.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + falta mantenimiento y limpieza
+
+[TABLERO TS-4] 20251119_164833_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_27264f.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + la señal de riesgo eléctrico no es fotoluminiscente
+  Recommendation: cambiar señalética a fotoluminiscente
+
+[CLOSET TECNICO 3] 20251119_163750_SN_Otras_observaciones_Sobre_los_equipos_hay_equip_a76bbe.jpg
+  Description: S/N	Otras observaciones: Sobre los equipos hay equipos de A.A. o tuberias de agua o desague? + las aperturas en el techo en las bandejas Porta cables no están correctamente selladas cayendo lluvia y polvo
+  Recommendation: colocar tapa de la bandeja Porta cables y sellar los pases por el techo
+
+[CLOSET TECNICO 3] 20251119_163646_3.1.12_Las_cajas_de_paso_tienen_tapa_hay_una_caja__3cc8ac.jpg
+  Description: 3.1.12	Las cajas de paso tienen tapa? + hay una caja sin tapa
+
+[CLOSET TECNICO 3] 20251119_163623_3.1.11_Hay_cables_expuestos_o_canaletas_sueltas_us_a55a2b.jpg
+  Description: 3.1.11	Hay cables expuestos o canaletas sueltas? + uso de PVC adosado
+  Recommendation: reemplazar tuberías de PVC por tuberías de conduit
+
+[CLOSET TECNICO 3] 20251119_163558_3.1.11_Hay_cables_expuestos_o_canaletas_sueltas_us_05e563.jpg
+  Description: 3.1.11	Hay cables expuestos o canaletas sueltas? + uso de tubería PVC expuesta dentro de bandeja Porta cables sin tapa cruzando tuberías eléctricas como de Comunicaciones
+  Recommendation: colocar una tapa a la bandeja Porta cables separando los circuitos de comunicaciones con los eléctricos y eliminando el PVC
+
+[CLOSET TECNICO 3] 20251119_163431_3.1.7_Las_carcazas_de_los_equipos_electricos_como__9530ad.jpg
+  Description: 3.1.7	Las carcazas de los equipos electricos, como  racks de servidores, UPS, transformadores, estabilizadores, aires acondiconados, bombas, estan conectados al circuito a tierra? (no considerar a los tableros electricos) + el gabinete de servidores no tiene puesta a tierra
+  Recommendation: aterrar gabinete y señalizar los puntos a tierra
+
+[CLOSET TECNICO 3] 20251119_163309_1.4.1_Tiene_detector_de_humo_operativo_no_posee_de_7fc14b.jpg
+  Description: 1.4.1	Tiene detector de humo operativo? + no posee detector de humo
+  Recommendation: instalar detector de humo conectado al sistema CACI
+
+[CLOSET TECNICO 3] 20251119_163239_1.3.2_Posee_extintor_cerca_para_fuego_tipo_C_no_ha_f8f19b.jpg
+  Description: 1.3.2	Posee extintor cerca para fuego tipo C? + no hay extintor C02 cerca
+  Recommendation: instalar extintor según lo que indica el plano de señaléticas
+
+[CLOSET TECNICO 3] 20251119_163121_1.1.3_Posee_en_el_ingreso_la_sealetica_fotoluminis_161722.jpg
+  Description: 1.1.3	Posee en el ingreso la señaletica fotoluminiscente de RIESGO ELECTRICO, NO INGRESAR Y USO EPP? + las tres señaléticas no son fotoluminiscentes
+  Recommendation: cambiar señalética a fotoluminiscente
+
+[TABLERO TD-3] 20251119_162646_3.1.17_Los_diagramas_unifilares_concuerdan_con_lo__4f8ca5.jpg
+  Description: 3.1.17	Los diagramas unifilares concuerdan con lo verificado físicamente? + el diagrama unifilar no concuerda con la realidad física
+  Recommendation: modificar diagrama según los planos eléctricos aprobados
+
+[TABLERO TD-3] 20251119_162606_3.1.1_Todos_los_circuitos_tienen_alimentadores_de__8cf217.jpg
+  Description: 3.1.1	Todos los circuitos tienen alimentadores de tierra? + la barreto potencial es muy pequeña para la cantidad de circuitos que existen
+  Recommendation: colocar una barra que potencial más larga
+
+[TABLERO TD-3] 20251119_162525_3.1.1_El_tablero_elctrico_de_material_metlico_est__6f1bfb.jpg
+  Description: 3.1.1	El tablero eléctrico de material metálico está conectado a tierra? + en circuito a tierra no está conectado a la barra aquí potencial y tampoco está señalizado
+  Recommendation: aterrar gabinete y señalizar los puntos a tierra
+
+[TABLERO TD-3] 20251119_162401_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_5e5121.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + los circuitos C-1, 2, 3, 4, 5 y 6 tienen doble hasta triple salida de cables
+  Recommendation: hacer los empalmes técnicos de las luces de emergencia fuera del gabinete de tablero eléctrico en una caja de paso
+
+[TABLERO TD-3] 20251119_162159_1.2.2_Cuenta_con_ITM_que_corresponden_a_la_capacid_ebd473.jpg
+  Description: 1.2.2	Cuenta con ITM que corresponden a la capacidad de corriente de los conductores eléctricos que protege? + el circuito c4 es de 20 amperios y tiene cable de 2.5 mm2
+  Recommendation: cambiar cable a 4 mm2
+
+[TABLERO TD-3] 20251119_162023_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_7d50f3.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + falta mantenimiento y limpieza
+
+[TABLERO TD-3] 20251119_161930_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_a6b612.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + la señal de riesgo eléctrico no es fotoluminiscente
+  Recommendation: cambiar señalética a fotoluminiscente
+
+[TABLERO TD-2] 20251119_155846_3.3.10_Existe_iluminacin_general_y_de_emergencia_e_0b43b4.jpg
+  Description: 3.3.10	Existe iluminación general y de emergencia en la zona de ubicación de los tableros eléctricos? + no por ser iluminación general
+  Recommendation: instalar una luminaria con su interruptor
+
+[TABLERO TD-2] 20251119_155736_3.3.8_Los_circuitos_se_encuentran_debidamente_rotu_4c115a.jpg
+  Description: 3.3.8	Los circuitos se encuentran debidamente rotulados? + los rótulos de las llaves c12, 13 y 14 son con pegados con masking tape
+  Recommendation: colocar un rótulo uniformizado a los otros sobre estas llaves
+
+[TABLERO TD-2] 20251119_155615_3.1.17_Los_diagramas_unifilares_concuerdan_con_lo__74f29b.jpg
+  Description: 3.1.17	Los diagramas unifilares concuerdan con lo verificado físicamente? + el diagrama unifilar no concuerda con la realidad física
+  Recommendation: reemplazar diagrama unifilar por el aprobado en planos eléctricos
+
+[TABLERO TD-2] 20251119_155530_3.1.4_Todos_los_circuitos_elctricos_tienen_protecc_913672.jpg
+  Description: 3.1.4	Todos los circuitos eléctricos tienen protección de interruptores diferenciales? + los circuitos c12, c13 y c14, tienen como llave termomagnética a 20 amperios pero su diferencial está sobredimensionada a 40 amperios
+  Recommendation: reemplazar las diferenciales por unas de 2x25
+
+[TABLERO TD-2] 20251119_155337_3.1.1_El_tablero_elctrico_de_material_metlico_est__745f44.jpg
+  Description: 3.1.1	El tablero eléctrico de material metálico está conectado a tierra? + falta señalizar los puntos a tierra
+  Recommendation: señalizar los puntos a tierra
+
+[TABLERO TD-2] 20251119_155302_1.2.6_Las_fases_de_los_circuitos_estn_diferenciado_0b8222.jpg
+  Description: 1.2.6	Las fases de los circuitos están diferenciados por colores o rotulados? + la acometida principal no está diferenciada a sus fases por colores
+  Recommendation: reemplazar cables o rotularlos de manera que se sepa de qué fase pertenece
+
+[TABLERO TD-2] 20251119_155204_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_388697.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + los circuitos C-12 y C-13, tienen doble salida de cable
+  Recommendation: realizar el empalme para las luces de emergencias fuera del tablero eléctrico en una caja de pase
+
+[TABLERO TD-2] 20251119_155048_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_a69091.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + los circuitos C-1, 2, 3, 4, 5 y 6 tienen doble hasta triple salida de cables
+  Recommendation: los cables deben ser conectados en una caja de pase fuera del tablero eléctrico, de manera que a la llave debe llegar solo un circuito
+
+[TABLERO TD-2] 20251119_154902_1.2.2_Cuenta_con_ITM_que_corresponden_a_la_capacid_c4aef6.jpg
+  Description: 1.2.2	Cuenta con ITM que corresponden a la capacidad de corriente de los conductores eléctricos que protege? + el circuito c10 es de 20 amperios y tiene un cable de 2.5 mm2
+  Recommendation: cambiar cable a 4 mm2
+
+[TABLERO TD-2] 20251119_154830_1.2.2_Cuenta_con_ITM_que_corresponden_a_la_capacid_516564.jpg
+  Description: 1.2.2	Cuenta con ITM que corresponden a la capacidad de corriente de los conductores eléctricos que protege? + el circuito c4 es de 20 amperios y tiene un cable de 2.5 mm2
+  Recommendation: cambiar cable a 4 mm2
+
+[TABLERO TD-2] 20251119_154503_3.1.4_Todos_los_circuitos_elctricos_tienen_protecc_abac4a.jpg
+  Description: 3.1.4	Todos los circuitos eléctricos tienen protección de interruptores diferenciales? + las diferenciales y ID-3 e ID-5 no está funcionando su tester
+  Recommendation: reemplazar diferenciales
+
+[TABLERO TD-2] 20251119_154406_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_70f509.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + falta mantenimiento y limpieza
+  Recommendation: realizar mantenimiento que incluye limpieza pintado si es que es requerido y ajuste de elementos como llaves cables etcétera
+
+[TABLERO TD-2] 20251119_154313_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_f56ad2.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + la señal de riesgo eléctrico no es fotoluminiscente
+  Recommendation: cambiar señalética a fotoluminiscente
+
+[TABLERO TD-1] 20251119_132626_3.3.10_Existe_iluminacin_general_y_de_emergencia_e_89bff5.jpg
+  Description: 3.3.10	Existe iluminación general y de emergencia en la zona de ubicación de los tableros eléctricos? + no posee iluminación general
+  Recommendation: instalar una luminaria con interruptor
+
+[TABLERO TD-1] 20251119_132538_3.3.10_Existe_iluminacin_general_y_de_emergencia_e_8c17b3.jpg
+  Description: 3.3.10	Existe iluminación general y de emergencia en la zona de ubicación de los tableros eléctricos? + por la ubicación de la luz de emergencia y el rack de servidor no se puede probar
+  Recommendation: realizar la prueba de luces de emergencia
+
+[TABLERO TD-1] 20251119_132504_3.3.9_Existe_espacio_libre_no_menor_a_un_metro_fre_e2883b.jpg
+  Description: 3.3.9	Existe espacio libre no menor a un metro frente a los tableros eléctricos? + el tablero no se puede abrir correctamente ya que tiene un rack de servidor adelante bloqueándolo
+  Recommendation: se debe retirar el rack del servidor o mover para permitir la apertura completa del tablero
+
+[TABLERO TD-1] 20251119_132341_3.1.17_Los_diagramas_unifilares_concuerdan_con_lo__a956ec.jpg
+  Description: 3.1.17	Los diagramas unifilares concuerdan con lo verificado físicamente? + el diagrama de infilar no concuerda con la realidad física
+  Recommendation: cambiar diagrama unifilar a la aprobado en los planos eléctricos
+
+[TABLERO TD-1] 20251119_132230_3.1.1_El_tablero_elctrico_de_material_metlico_est__677a4d.jpg
+  Description: 3.1.1	El tablero eléctrico de material metálico está conectado a tierra? + los puntos a tierra no están señalizados
+  Recommendation: señalizar los puntos a tierra
+
+[TABLERO TD-1] 20251119_132129_1.2.6_Est_libre_de_empalmes_no_tcnicos_dentro_del__a25968.jpg
+  Description: 1.2.6	Está libre de empalmes no técnicos dentro del tablero? + se ha encontrado como mínimo un Empalme
+  Recommendation: eliminar cualquier Empalme de cable o utilizar empalmes técnicos como fundas de termocontraíbles
+
+[TABLERO TD-1] 20251119_132036_1.2.6_Los_ITM_DIF_u_otros_accesorios_cuenta_con_te_b89192.jpg
+  Description: 1.2.6	Los ITM, DIF u otros accesorios cuenta con terminales? + en la entrada a la llave general no se están utilizando en las terminales las fundas termo contraíbles
+  Recommendation: colocar fundas termo contraíbles
+
+[TABLERO TD-1] 20251119_131936_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_0e16a1.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + el circuito c19 tiene doble salida de cables
+  Recommendation: independizar cada circuito con su llave termomagnética
+
+[TABLERO TD-1] 20251119_131905_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_77f0fd.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + los circuitos c7 c8 y c9 tienen doble salida de cables
+  Recommendation: independizar cada circuito con su llave termomagnética
+
+[TABLERO TD-1] 20251119_131749_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_de10b4.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + los circuitos C3 c4 y c5 tienen doble salida de cables
+  Recommendation: independizar cada circuito con una llave termomagnética
+
+[TABLERO TD-1] 20251119_131658_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_23a569.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + falta mantenimiento y limpieza
+
+[TABLERO TD-1] 20251119_131622_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_6c8f8c.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + la señalética de riesgo eléctrico no es fotoluminiscente
+  Recommendation: cambiar señalética por una fotoluminiscente
+
+[CTO. TECNICO 1] 20251119_120806_SN_Otras_observaciones_Sobre_los_equipos_hay_equip_7dbf8f.jpg
+  Description: S/N	Otras observaciones: Sobre los equipos hay equipos de A.A. o tuberias de agua o desague? + el transformador se encuentra al ras del suelo el cual está al ras del piso de primer nivel
+  Recommendation: instalar el trapo sobre un poyo que evite la filtración de agua ante un aniego
+
+[CTO. TECNICO 1] 20251119_120644_3.1.12_Las_cajas_de_paso_tienen_tapa_en_el_techo_h_1a8b13.jpg
+  Description: 3.1.12	Las cajas de paso tienen tapa? + en el techo hay una caja de pase cuadrada para el sensor de movimiento donde se pueden visualizar los cables
+  Recommendation: cambiar caja por un octogonal o colocarle una tapa
+
+[CTO. TECNICO 1] 20251119_120554_3.3.3_Las_estructuras_de_soporte_de_equipos_de_air_1a01e4.jpg
+  Description: 3.3.3	Las estructuras de soporte de equipos de aire acondicionado, racks de servidores o tableros, están adecuadamente fijadas, y no presentan óxido ni corrosión? + en el techo hay una caja cuadrada para el sensor de movimiento que se puede visualizar los cables
+  Recommendation: reemplazar caja por un tipo octogonal o colocarle una tapa
+
+[CTO. TECNICO 1] 20251119_120422_3.1.12_Las_cajas_de_paso_tienen_tapa_hay_una_caja__78ebc3.jpg
+  Description: 3.1.12	Las cajas de paso tienen tapa? + hay una caja de pase de comunicaciones que no tiene tapa
+  Recommendation: colocar tapa a las cajas de pase
+
+[CTO. TECNICO 1] 20251119_120352_3.1.11_Hay_cables_expuestos_o_canaletas_sueltas_ha_45301c.jpg
+  Description: 3.1.11	Hay cables expuestos o canaletas sueltas? + hay uso de tubería PVC expuesta
+  Recommendation: reemplazar toda la tubería PVC por tubería conduit
+
+[CTO. TECNICO 1] 20251119_120305_3.1.11_Hay_cables_expuestos_o_canaletas_sueltas_lo_82c3d9.jpg
+  Description: 3.1.11	Hay cables expuestos o canaletas sueltas? + los cables que van hacia los transformadores no están entubados
+  Recommendation: entubar todos los cables con tubería conduit
+
+[CTO. TECNICO 1] 20251119_120232_3.1.11_Hay_cables_expuestos_o_canaletas_sueltas_ha_bcce03.jpg
+  Description: 3.1.11	Hay cables expuestos o canaletas sueltas? + hay cables eléctricos sin entubar al costado del tablero TS-OF
+  Recommendation: entubar todos los cables
+
+[CTO. TECNICO 1] 20251119_120102_3.1.7_Las_carcazas_de_los_equipos_electricos_como__2fab62.jpg
+  Description: 3.1.7	Las carcazas de los equipos electricos, como  racks de servidores, UPS, transformadores, estabilizadores, aires acondiconados, bombas, estan conectados al circuito a tierra? (no considerar a los tableros electricos) + los dos trafos no poseen en sus gabinetes punto a tierra
+  Recommendation: instalar punta tierra a los gabinetes indicados
+
+[CTO. TECNICO 1] 20251119_120001_3.1.7_Las_carcazas_de_los_equipos_electricos_como__5bfd2e.jpg
+  Description: 3.1.7	Las carcazas de los equipos electricos, como  racks de servidores, UPS, transformadores, estabilizadores, aires acondiconados, bombas, estan conectados al circuito a tierra? (no considerar a los tableros electricos) + el gabinete del ups no posee punto a tierra
+  Recommendation: instalar un punto a tierra visible en el gabinete
+
+[CTO. TECNICO 1] 20251119_115845_2.3.1_En_los_techos_muros_columnas_o_pisos_hay_raj_6faa46.jpg
+  Description: 2.3.1	En los techos, muros, columnas o pisos hay rajaduras o deformaciones? + la losa del piso posee rajaduras
+
+[CTO. TECNICO 1] 20251119_115822_2.3.1_En_los_techos_muros_columnas_o_pisos_hay_hum_593721.jpg
+  Description: 2.3.1	En los techos, muros, columnas o pisos hay humedad o salitre? + hay humedad aparentemente de filtración de agua en las pared derecha
+
+[CTO. TECNICO 1] 20251119_115750_2.3.1_En_los_techos_muros_columnas_o_pisos_hay_raj_9549c1.jpg
+  Description: 2.3.1	En los techos, muros, columnas o pisos hay rajaduras o deformaciones? + hay fisuras en el techo
+
+[CTO. TECNICO 1] 20251119_115646_1.1.4_Tiene_luces_de_emergencia_operativa_e_ininte_4a6caa.jpg
+  Description: 1.1.4	Tiene luces de emergencia operativa e ininterrumpida? + la luz de emergencia es muy tenue y Se presume de que no cumple con los lumens requeridos por Norma
+  Recommendation: cambiar luz de emergencia a una de tipología que cubra 10 luxes por metro cuadrado
+
+[CTO. TECNICO 1] 20251119_115621_1.1.3_Posee_en_el_ingreso_la_sealetica_fotoluminis_76d7a0.jpg
+  Description: 1.1.3	Posee en el ingreso la señaletica fotoluminiscente de RIESGO ELECTRICO, NO INGRESAR Y USO EPP? + las tres señaléticas no son fotoluminiscentes
+  Recommendation: cambiar señaléticas a fotoluminiscente
+
+[TABLERO T-TIMBRE] 20251119_115523_3.3.10_Existe_iluminacin_general_y_de_emergencia_e_0b65d2.jpg
+  Description: 3.3.10	Existe iluminación general y de emergencia en la zona de ubicación de los tableros eléctricos? + no posee luz de emergencia cercana para permitir la visualización
+  Recommendation: instalar una luz de emergencia arriba para que permita la visualización
+
+[TABLERO T-TIMBRE] 20251119_115433_3.3.8_Los_circuitos_se_encuentran_debidamente_rotu_42f759.jpg
+  Description: 3.3.8	Los circuitos se encuentran debidamente rotulados? + ningún circuito está rotulado
+  Recommendation: rotular todos los circuitos y timers
+
+[TABLERO T-TIMBRE] 20251119_115410_3.3.8_Tiene_directorio_de_los_circuitos_indicando__b7be59.jpg
+  Description: 3.3.8	Tiene directorio de los circuitos, indicando de manera visible y clara la instalación que controla? + no posee directorio
+  Recommendation: instalar un directorio indicando los circuitos que se alimentan
+
+[TABLERO T-TIMBRE] 20251119_115346_3.3.7_Ellos_tableros_elctricos_cuentan_con_identif_4f35ad.jpg
+  Description: 3.3.7	El(los) tablero(s) eléctrico(s) cuenta(n) con identificación? + el letrado de identificación no dice que es tablero T-TIMBRE
+  Recommendation: colocar un letrero que diga T-TIMBRE
+
+[TABLERO T-TIMBRE] 20251119_115306_3.1.17_Los_diagramas_unifilares_concuerdan_con_lo__aadc90.jpg
+  Description: 3.1.17	Los diagramas unifilares concuerdan con lo verificado físicamente? + no posee diagrama unifilar
+  Recommendation: instalar diagrama unifilar según los cambios recomendados
+
+[TABLERO T-TIMBRE] 20251119_115238_3.1.4_Todos_los_circuitos_elctricos_tienen_protecc_db0bdf.jpg
+  Description: 3.1.4	Todos los circuitos eléctricos tienen protección de interruptores diferenciales? + no posee diferenciales
+  Recommendation: instalar dos diferenciales de 2 x 25
+
+[TABLERO T-TIMBRE] 20251119_115212_3.1.2_El_tablero_cuenta_con_placa_de_proteccin_man_dfd866.jpg
+  Description: 3.1.2	El tablero cuenta con placa de protección (mandil)? + no posee mandil
+  Recommendation: instalar un mandil de acrílico con aperturas para las llaves, contactores y timers
+
+[TABLERO T-TIMBRE] 20251119_115139_3.1.1_Todos_los_circuitos_tienen_alimentadores_de__907bb9.jpg
+  Description: 3.1.1	Todos los circuitos tienen alimentadores de tierra? + no tiene barra equipotencial
+  Recommendation: instalar una barra equipotencial haciendo llegar la tierra peicnipal y conectar un cable a tierra para cada circuito
+
+[TABLERO T-TIMBRE] 20251119_114845_1.2.3_El_tablero_tiene_un_interruptor_general_en_s_510615.jpg
+  Description: 1.2.3	El tablero tiene un interruptor general en su interior o adyacente al mismo? + no posee interruptor general
+  Recommendation: instalar interruptor general
+
+[TABLERO T-TIMBRE] 20251119_114823_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_a977c7.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + las dos llaves se alimentan por medio de puente
+  Recommendation: independizar llaves colocando un interruptor general Y utilizando una peineta
+
+[TABLERO T-TIMBRE] 20251119_114745_1.2.2_Cuenta_con_ITM_que_corresponden_a_la_capacid_852c42.jpg
+  Description: 1.2.2	Cuenta con ITM que corresponden a la capacidad de corriente de los conductores eléctricos que protege? + los dos interruptores termomagnéticos son de 20 amperios y tienen salidas de cables de 2.5 mm2
+  Recommendation: cambiar cable a 4 mm2
+
+[TABLERO T-TIMBRE] 20251119_114542_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_751803.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + la señal de riesgo eléctrico no es fotoluminiscente
+  Recommendation: cambiar señalética a fotoluminiscente
+
+[TABLERO TS-1] 20251119_113436_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_ee6106.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + no se puede cerrar el tablero
+  Recommendation: reparar o cambiar el tipo de cerradura del tablero
+
+[TABLERO TS-1] 20251119_113401_3.3.9_Existe_espacio_libre_no_menor_a_un_metro_fre_4874e5.jpg
+  Description: 3.3.9	Existe espacio libre no menor a un metro frente a los tableros eléctricos? + luz de emergencia de luz tenue se sospecha que no cumple con los lumens requeridos
+  Recommendation: cambiar luz de emergencia a una de tipología que cubra 10 luxes por metro cuadrado
+
+[TABLERO TS-1] 20251119_113213_3.1.17_Los_diagramas_unifilares_concuerdan_con_lo__2f6903.jpg
+  Description: 3.1.17	Los diagramas unifilares concuerdan con lo verificado físicamente? + el diagrama unifilar no concuerda con la realidad
+  Recommendation: colocar nuevo diagrama según los planos eléctricos aprobados
+
+[TABLERO TS-1] 20251119_113106_3.1.1_Todos_los_circuitos_tienen_alimentadores_de__0f4fe8.jpg
+  Description: 3.1.1	Todos los circuitos tienen alimentadores de tierra? + falta una conexion a tierra
+  Recommendation: identificar todas las tierras y agregar la Tierra faltante
+
+[TABLERO TS-1] 20251119_113017_3.1.1_El_tablero_elctrico_de_material_metlico_est__b13444.jpg
+  Description: 3.1.1	El tablero eléctrico de material metálico está conectado a tierra? + falta señalizar los puntos a tierra
+  Recommendation: señalizar los puntos a tierra
+
+[TABLERO TS-1] 20251119_112801_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_b1355d.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + falta mantenimiento y limpieza
+
+[TABLERO TS-1] 20251119_112739_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_d95ba1.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + la señal de riesgo eléctrico no es fotoluminiscente
+  Recommendation: cambiar señalética por una fotoluminiscente
+
+[TABLERO TS-OF] 20251119_111828_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_e6b680.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + la cerradura del gabonete no cierra
+  Recommendation: corregir tipología de cerradura
+
+[TABLERO TS-OF] 20251119_111713_3.3.10_Existe_iluminacin_general_y_de_emergencia_e_efdf01.jpg
+  Description: 3.3.10	Existe iluminación general y de emergencia en la zona de ubicación de los tableros eléctricos? + la luz de emergencia es muy tenue y se sospecha que no cumple con los lumens requeridos
+  Recommendation: cambiar luz de emergencia a una de tipología que cubra 10 luxes por metro cuadrado
+
+[TABLERO TS-OF] 20251119_111607_3.3.8_Tiene_directorio_de_los_circuitos_indicando__14629b.jpg
+  Description: 3.3.8	Tiene directorio de los circuitos, indicando de manera visible y clara la instalación que controla? + hay 5 reservas equipadas que no aparecen en el directorio
+  Recommendation: corregir directorio según la realidad en base al plano eléctrico aprobado
+
+[TABLERO TS-OF] 20251119_111522_3.1.17_Los_diagramas_unifilares_concuerdan_con_lo__03026a.jpg
+  Description: 3.1.17	Los diagramas unifilares concuerdan con lo verificado físicamente? + el diagrama unifilar no concuerda con la realidad física
+
+[TABLERO TS-OF] 20251119_111434_3.1.1_Todos_los_circuitos_tienen_alimentadores_de__d39578.jpg
+  Description: 3.1.1	Todos los circuitos tienen alimentadores de tierra? + la conexion de llegada de tierra no está llegando a la barra equipotencial
+  Recommendation: conectar el cable a tierra principal a la barra equipotencial
+
+[TABLERO TS-OF] 20251119_111216_3.1.1_El_tablero_elctrico_de_material_metlico_est__672d0f.jpg
+  Description: 3.1.1	El tablero eléctrico de material metálico está conectado a tierra? + los puntos a tierra no están señalizados
+  Recommendation: señalizar puntos a tierra
+
+[TABLERO TS-OF] 20251119_111135_1.2.6_Las_fases_de_los_circuitos_estn_diferenciado_53ffbd.jpg
+  Description: 1.2.6	Las fases de los circuitos están diferenciados por colores o rotulados? + la acometida principal no tiene diferenciada sus fases por colores
+  Recommendation: rotular cada fase de la acometida
+
+[TABLERO TS-OF] 20251119_110939_1.2.6_Los_ITM_DIF_u_otros_accesorios_cuenta_con_te_00f5ac.jpg
+  Description: 1.2.6	Los ITM, DIF u otros accesorios cuenta con terminales? + en vez de uso de terminales están usando cinta aislante
+  Recommendation: colocar los terminales adecuados
+
+[TABLERO TS-OF] 20251119_110806_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_7fa8f4.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + el circuito c10 tiene doble salida de alimentador
+  Recommendation: independizar alimentadores cada circuito debe llevar un solo interruptor termomagnético
+
+[TABLERO TS-OF] 20251119_110700_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_0b47e7.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + la señal de riesgo eléctrico no es fotoluminiscente
+  Recommendation: cambiar señalética a fotoluminiscente
+
+[TABLERO TG] 20251119_104733_3.3.10_Existe_iluminacin_general_y_de_emergencia_e_4cd55d.jpg
+  Description: 3.3.10	Existe iluminación general y de emergencia en la zona de ubicación de los tableros eléctricos? + la luz de emergencia es muy tenue por lo que se sospecha que no cumple con los lumens requeridos
+  Recommendation: reemplazar luz de emergencia con un tipo que cumpla mínimo 10 Lux por metro cuadrado
+
+[TABLERO TG] 20251119_104533_3.3.8_Los_circuitos_se_encuentran_debidamente_rotu_d59d49.jpg
+  Description: 3.3.8	Los circuitos se encuentran debidamente rotulados? + hay una llave de 3x6 amperios que no está en el diagrama y tampoco está rotulada
+  Recommendation: indicar la función de esa llave
+
+[TABLERO TG] 20251119_104355_3.1.17_Los_diagramas_unifilares_concuerdan_con_lo__76f07a.jpg
+  Description: 3.1.17	Los diagramas unifilares concuerdan con lo verificado físicamente? + los diagramas unifilares no concuerdan con la realidad física
+  Recommendation: modificar diagrama unifilar según el plano eléctrico aprobado
+
+[TABLERO TG] 20251119_104307_3.1.3_Las_aberturas_no_usadas_reserva_se_encuentra_440fe9.jpg
+  Description: 3.1.3	Las aberturas no usadas (reserva) se encuentran cerradas con tapas? + el hueco de reservas libres no tiene tapa
+  Recommendation: colocar tapa en todas las reservas libres
+
+[TABLERO TG] 20251119_104227_3.1.1_El_tablero_elctrico_de_material_metlico_est__2394c7.jpg
+  Description: 3.1.1	El tablero eléctrico de material metálico está conectado a tierra? + el mandil no está aterrado y los otros puntos a tierra no están señalizados
+  Recommendation: aterrar mandil y señalizar los puntos a tierra
+
+[TABLERO TG] 20251119_104057_1.2.6_Los_cables_son_del_tipo_no_propagador_del_in_862bd8.jpg
+  Description: 1.2.6	Los cables son del tipo no propagador del incendio, libre de halógenos? + hay utilización de cable thw, Qué es considerado propagador de incendios
+  Recommendation: cambiar cable THW por LSOH
+
+[TABLERO TG] 20251119_104001_1.2.6_Las_fases_de_los_circuitos_estn_diferenciado_da3b3c.jpg
+  Description: 1.2.6	Las fases de los circuitos están diferenciados por colores o rotulados? + el cable utilizado en las barras equipotenciales para conexiones a tierra es color negro
+  Recommendation: todos los cables a tierra deben ser color amarillo verde
+
+[TABLERO TG] 20251119_103911_1.2.6_Las_fases_de_los_circuitos_estn_diferenciado_c12212.jpg
+  Description: 1.2.6	Las fases de los circuitos están diferenciados por colores o rotulados? + la gran mayoría de los circuitos no están diferenciadas sus fases por colores
+  Recommendation: rotular cada cable según su fase y utilizar termo contraíbles para diferenciar en los colores
+
+[TABLERO TG] 20251119_103706_1.2.6_Los_ITM_DIF_u_otros_accesorios_cuenta_con_te_7f4063.jpg
+  Description: 1.2.6	Los ITM, DIF u otros accesorios cuenta con terminales? + las barras no utilizadas están solo protegidas con cinta aislante
+  Recommendation: debe colocarse las tapas adecuadas a las barras no utilizadas
+
+[TABLERO TG] 20251119_103619_1.2.6_Los_ITM_DIF_u_otros_accesorios_cuenta_con_te_a531b5.jpg
+  Description: 1.2.6	Los ITM, DIF u otros accesorios cuenta con terminales? + los circuitos que van al pozo a tierra no poseen terminales en su mayoría
+  Recommendation: colocar terminales según el calibre de cable
+
+[TABLERO TG] 20251119_103520_1.2.6_Los_ITM_DIF_u_otros_accesorios_cuenta_con_te_ff3068.jpg
+  Description: 1.2.6	Los ITM, DIF u otros accesorios cuenta con terminales? + la alimentación del circuito c10 no es mediante la barra, sino por una conexión indebida
+  Recommendation: colocar las barras para la conexión directa a la llave C10
+
+[TABLERO TG] 20251119_103401_1.2.6_Los_ITM_DIF_u_otros_accesorios_cuenta_con_te_4f87ea.jpg
+  Description: 1.2.6	Los ITM, DIF u otros accesorios cuenta con terminales? + todas las llaves no utilizan terminales en vez de ellos están utilizando cinta aislante
+  Recommendation: corregir ingresos de cables mediante terminales
+
+[TABLERO TG] 20251119_103216_1.2.3_Cuenta_con_un_circuito_elctrico_por_cada_int_3ac1ce.jpg
+  Description: 1.2.3	Cuenta con un circuito eléctrico por cada interruptor termomagnético? + el circuito C-1 tiene doble ingreso y doble salida para el uso de controles
+  Recommendation: solucionar la fuerza de controles mediante borneras o repartidor
+
+[TABLERO TG] 20251119_103032_1.2.2_Cuenta_con_ITM_que_corresponden_a_la_capacid_ae73de.jpg
+  Description: 1.2.2	Cuenta con ITM que corresponden a la capacidad de corriente de los conductores eléctricos que protege? + el circuito c10 es de 25 amperios y tiene un cable de 2.5 mm2
+  Recommendation: cambiar cable a 4 mm2
+
+[TABLERO TG] 20251119_102616_1.2.2_Cuenta_con_ITM_que_corresponden_a_la_capacid_2947ab.jpg
+  Description: 1.2.2	Cuenta con ITM que corresponden a la capacidad de corriente de los conductores eléctricos que protege? + el circuito c7 tiene un amperaje de 63 amperios y un cable de 10 mm2
+  Recommendation: cambiar cable a 16 mm2
+
+[TABLERO TG] 20251119_102519_1.2.1_El_gabinete_del_tablero_se_encuentra_en_buen_7cdb2e.jpg
+  Description: 1.2.1	El gabinete del tablero se encuentra en buen estado de conservación? + falta mantenimiento y limpieza
+  Recommendation: realizar mantenimiento general del tablero limpieza y ajuste de sus elementos como llaves y cables
+
+[TABLERO TG] 20251119_102305_1.1.3_Cuenta_con_sealizacion_de_RIESGO_ELECTRICO_f_9cadeb.jpg
+  Description: 1.1.3	Cuenta con señalizacion de RIESGO ELECTRICO fotoluminiscente? + la señalética de riesgo eléctrico no es fotoluminiscente
+  Recommendation: cambiar señalética por una fotoluminiscente
+

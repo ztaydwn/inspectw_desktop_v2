@@ -9,6 +9,7 @@ from app.core.processing import (cargar_zip, procesar_zip, reaplicar_recomendaci
                                  cargar_directorio)
 from app.report.pptx_writer import export_groups_to_pptx_report
 from app.report.xlsx_writer import export_groups_to_xlsx_report
+from app.report.template_xlsx_writer import export_groups_to_xlsx_with_template
 import re, json, csv, io
 
 class DataProcessorWorker(QObject):
@@ -177,7 +178,36 @@ class ReportWorker(QObject):
 
             if self.report_type == 'xlsx':
                 control_docs = self._extract_control_documents()
-                export_groups_to_xlsx_report(self.grupos, self.archivos, self.destino, progress_callback=self.progress, control_documents=control_docs)
+                # Intentar detectar una plantilla XLSX proporcionada por el usuario
+                template_bytes = None
+                try:
+                    for path, data in self.archivos.items():
+                        base = os.path.basename(path).lower()
+                        if base.endswith('.xlsx') and (('template' in base) or ('plantilla' in base)):
+                            template_bytes = data
+                            break
+                except Exception:
+                    template_bytes = None
+
+                if template_bytes:
+                    export_groups_to_xlsx_with_template(
+                        self.grupos,
+                        self.archivos,
+                        self.destino,
+                        template_bytes=template_bytes,
+                        progress_callback=self.progress,
+                        control_documents=control_docs,
+                        conclusiones=None,
+                        info_path=os.path.join("datos", "infoproyect.txt"),
+                    )
+                else:
+                    export_groups_to_xlsx_report(
+                        self.grupos,
+                        self.archivos,
+                        self.destino,
+                        progress_callback=self.progress,
+                        control_documents=control_docs,
+                    )
             elif self.report_type == 'pptx':
                 export_groups_to_pptx_report(self.grupos, self.archivos, self.destino, progress_callback=self.progress)
             
