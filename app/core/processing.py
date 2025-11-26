@@ -116,7 +116,9 @@ def _parse_descriptions(txt_descriptions: str, group_lookup: Dict[str, str], arc
         if m:
             # Si había un bloque anterior, procesarlo
             if current_block and 'description' in current_block:
-                fotos.append(_create_foto_from_block(current_block, group_lookup, archivos, warnings, line_num))
+                foto_obj = _create_foto_from_block(current_block, group_lookup, archivos, warnings, line_num)
+                if foto_obj:
+                    fotos.append(foto_obj)
             current_block = {"carpeta": m.group(1), "filename": m.group(2), "description": "", "recommendation": ""}
         elif line.lower().startswith("description:") and current_block:
             desc_content = line.split(":", 1)[1].strip()
@@ -135,7 +137,9 @@ def _parse_descriptions(txt_descriptions: str, group_lookup: Dict[str, str], arc
 
     # Process last block
     if current_block and 'description' in current_block:
-        fotos.append(_create_foto_from_block(current_block, group_lookup, archivos, warnings, len(lines)))
+        foto_obj = _create_foto_from_block(current_block, group_lookup, archivos, warnings, len(lines))
+        if foto_obj:
+            fotos.append(foto_obj)
 
     return fotos, warnings
 
