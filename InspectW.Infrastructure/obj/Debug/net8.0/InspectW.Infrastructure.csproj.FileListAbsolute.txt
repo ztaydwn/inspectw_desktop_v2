@@ -1,0 +1,16 @@
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\InspectW.Infrastructure.csproj.AssemblyReference.cache
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\InspectW.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\InspectW.Infrastructure.AssemblyInfoInputs.cache
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\InspectW.Infrastructure.AssemblyInfo.cs
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\InspectW.Infrastructure.csproj.CoreCompileInputs.cache
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\InspectW.Infrastructure.sourcelink.json
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\bin\Debug\net8.0\InspectW.Infrastructure.deps.json
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\bin\Debug\net8.0\InspectW.Infrastructure.dll
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\bin\Debug\net8.0\InspectW.Infrastructure.pdb
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\bin\Debug\net8.0\InspectW.Domain.dll
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\bin\Debug\net8.0\InspectW.Domain.pdb
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\InspectW.D5372513.Up2Date
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\InspectW.Infrastructure.dll
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\refint\InspectW.Infrastructure.dll
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\InspectW.Infrastructure.pdb
+D:\PROYECTOS\inspectw_desktop\InspectW.Infrastructure\obj\Debug\net8.0\ref\InspectW.Infrastructure.dll

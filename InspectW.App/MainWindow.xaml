@@ -1,0 +1,74 @@
+<Window x:Class="InspectW.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="InspectW (WPF)" Height="520" Width="900">
+    <Grid Background="#0F172A" Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="InspectW Desktop (C#)" FontSize="24" FontWeight="Bold" Foreground="#E2E8F0" TextAlignment="Left"/>
+
+        <Border Grid.Row="1" Margin="0,12,0,12" Background="#111827" Padding="12" CornerRadius="8">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="ZIP" Foreground="#CBD5E1" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="8,0">
+                        <TextBox Width="260" Text="{Binding ZipPath, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Content="..." Width="32" Margin="8,0,0,0" Command="{Binding BrowseZipCommand}"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="2" Text="Carpeta" Foreground="#CBD5E1" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="8,0">
+                        <TextBox Width="260" Text="{Binding FolderPath, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Content="..." Width="32" Margin="8,0,0,0" Command="{Binding BrowseFolderCommand}"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Histórico CSV" Foreground="#CBD5E1" VerticalAlignment="Center" Margin="0,8,0,0"/>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="8,8,0,0">
+                        <TextBox Width="260" Text="{Binding HistoricoPath, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Content="..." Width="32" Margin="8,0,0,0" Command="{Binding BrowseHistoricoCommand}"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="Plantilla XLSX" Foreground="#CBD5E1" VerticalAlignment="Center" Margin="0,8,0,0"/>
+                    <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" Margin="8,8,0,0">
+                        <TextBox Width="260" Text="{Binding PlantillaPath, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Content="..." Width="32" Margin="8,0,0,0" Command="{Binding BrowsePlantillaCommand}"/>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="Cargar" Width="120" Command="{Binding LoadCommand}"/>
+                    <Button Content="Exportar XLSX" Width="140" Margin="12,0,0,0" Command="{Binding ExportXlsxCommand}"/>
+                    <TextBlock Text="{Binding Status}" Foreground="#E5E7EB" Margin="16,4,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Background="#111827" CornerRadius="8" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Grupos" Foreground="#A5B4FC" FontWeight="SemiBold"/>
+                <ListBox ItemsSource="{Binding Grupos}" DisplayMemberPath="Nombre" Height="250"/>
+            </StackPanel>
+        </Border>
+
+        <TextBlock Grid.Row="3" Text="Carga ZIP/carpeta, añade histórico opcional y exporta XLSX" Foreground="#9CA3AF" Margin="4,8,0,0"/>
+    </Grid>
+</Window>

@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "InspectW.Infrastructure/1.0.0": {
+        "dependencies": {
+          "InspectW.Domain": "1.0.0"
+        },
+        "runtime": {
+          "InspectW.Infrastructure.dll": {}
+        }
+      },
+      "InspectW.Domain/1.0.0": {
+        "runtime": {
+          "InspectW.Domain.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "InspectW.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "InspectW.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

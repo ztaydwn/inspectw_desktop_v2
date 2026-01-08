@@ -1,0 +1,12 @@
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\bin\Debug\net8.0\InspectW.Domain.deps.json
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\bin\Debug\net8.0\InspectW.Domain.dll
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\bin\Debug\net8.0\InspectW.Domain.pdb
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\obj\Debug\net8.0\InspectW.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\obj\Debug\net8.0\InspectW.Domain.AssemblyInfoInputs.cache
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\obj\Debug\net8.0\InspectW.Domain.AssemblyInfo.cs
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\obj\Debug\net8.0\InspectW.Domain.csproj.CoreCompileInputs.cache
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\obj\Debug\net8.0\InspectW.Domain.sourcelink.json
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\obj\Debug\net8.0\InspectW.Domain.dll
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\obj\Debug\net8.0\refint\InspectW.Domain.dll
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\obj\Debug\net8.0\InspectW.Domain.pdb
+D:\PROYECTOS\inspectw_desktop\InspectW.Domain\obj\Debug\net8.0\ref\InspectW.Domain.dll
