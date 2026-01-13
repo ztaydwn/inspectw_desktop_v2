@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("InspectW.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6f77280e07d209953a8978a62071e762fd3aa88c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+deb93673545dfcd6b442782f836f0e95ebefe72f")]
 [assembly: System.Reflection.AssemblyProductAttribute("InspectW.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("InspectW.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

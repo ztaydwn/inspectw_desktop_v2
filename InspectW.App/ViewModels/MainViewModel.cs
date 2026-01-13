@@ -26,7 +26,6 @@ namespace InspectW.App.ViewModels
         [ObservableProperty] private string? _zipPath;
         [ObservableProperty] private string? _folderPath;
         [ObservableProperty] private string? _historicoPath;
-        [ObservableProperty] private string? _plantillaPath;
         [ObservableProperty] private string _status = "Listo";
         [ObservableProperty] private bool _isBusy;
 
@@ -37,7 +36,6 @@ namespace InspectW.App.ViewModels
         public ICommand BrowseZipCommand { get; }
         public ICommand BrowseFolderCommand { get; }
         public ICommand BrowseHistoricoCommand { get; }
-        public ICommand BrowsePlantillaCommand { get; }
 
         public MainViewModel(
             IZipLoader zipLoader,
@@ -57,7 +55,6 @@ namespace InspectW.App.ViewModels
             BrowseZipCommand = new RelayCommand(BrowseZip);
             BrowseFolderCommand = new RelayCommand(BrowseFolder);
             BrowseHistoricoCommand = new RelayCommand(BrowseHistorico);
-            BrowsePlantillaCommand = new RelayCommand(BrowsePlantilla);
         }
 
         private bool CanRun() => !IsBusy;
@@ -99,19 +96,6 @@ namespace InspectW.App.ViewModels
             }
         }
 
-        private void BrowsePlantilla()
-        {
-            var dlg = new Microsoft.Win32.OpenFileDialog
-            {
-                Filter = "Excel|*.xlsx",
-                CheckFileExists = true
-            };
-            if (dlg.ShowDialog() == true)
-            {
-                PlantillaPath = dlg.FileName;
-            }
-        }
-
         private async Task LoadAsync()
         {
             if (IsBusy) return;
@@ -137,14 +121,19 @@ namespace InspectW.App.ViewModels
                     return;
                 }
 
-                // Anexar histórico y plantilla como archivos opcionales
-                if (!string.IsNullOrWhiteSpace(HistoricoPath) && File.Exists(HistoricoPath))
+                var historicoPath = HistoricoPath;
+                if (string.IsNullOrWhiteSpace(historicoPath))
                 {
-                    archivos["historico.csv"] = await File.ReadAllBytesAsync(HistoricoPath);
+                    var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                    var candidate = Path.Combine(baseDir, "datos", "historico.csv");
+                    if (File.Exists(candidate))
+                    {
+                        historicoPath = candidate;
+                    }
                 }
-                if (!string.IsNullOrWhiteSpace(PlantillaPath) && File.Exists(PlantillaPath))
+                if (!string.IsNullOrWhiteSpace(historicoPath) && File.Exists(historicoPath))
                 {
-                    archivos["plantilla.xlsx"] = await File.ReadAllBytesAsync(PlantillaPath);
+                    archivos["historico.csv"] = await File.ReadAllBytesAsync(historicoPath);
                 }
 
                 _lastArchivos = archivos;
@@ -186,19 +175,13 @@ namespace InspectW.App.ViewModels
 
             try
             {
-                byte[]? plantillaBytes = null;
-                if (!string.IsNullOrWhiteSpace(PlantillaPath) && File.Exists(PlantillaPath))
-                {
-                    plantillaBytes = await File.ReadAllBytesAsync(PlantillaPath);
-                }
-
                 var controlDocs = _controlLoader.Load(_lastArchivos);
 
                 await _xlsxReportService.GenerateAsync(
                     Grupos.ToList(),
                     _lastArchivos,
                     dlg.FileName,
-                    plantillaBytes,
+                    null,
                     controlDocs,
                     progreso: null);
 
