@@ -12,6 +12,11 @@ from app.report.xlsx_writer import export_groups_to_xlsx_report
 from app.report.template_xlsx_writer import export_groups_to_xlsx_with_template
 import re, json, csv, io
 
+def _apply_description_recs(grupo):
+    recs = [f.recommendation for f in grupo.fotos if f.recommendation]
+    if recs:
+        grupo.recomendaciones = recs
+
 class DataProcessorWorker(QObject):
     finished = pyqtSignal(dict, dict, list)
     progress = pyqtSignal(str)
@@ -41,8 +46,11 @@ class DataProcessorWorker(QObject):
                 nuevos_grupos, error = procesar_zip(nuevos_archivos, hist_path=self.hist_path)
                 if error: errors.append(f"Error en {os.path.basename(path)}: {error}")
                 for key, grupo_nuevo in nuevos_grupos.items():
-                    if key in grupos_acumulados: grupos_acumulados[key].fotos.extend(grupo_nuevo.fotos)
-                    else: grupos_acumulados[key] = grupo_nuevo
+                    if key in grupos_acumulados:
+                        grupos_acumulados[key].fotos.extend(grupo_nuevo.fotos)
+                        _apply_description_recs(grupos_acumulados[key])
+                    else:
+                        grupos_acumulados[key] = grupo_nuevo
             except Exception as e:
                 errors.append(f"Error crítico procesando {base_name}: {e}")
         self.finished.emit(grupos_acumulados, archivos_acumulados, errors)
@@ -321,8 +329,11 @@ class MainWindow(QWidget):
     def on_processing_finished(self, nuevos_grupos, nuevos_archivos, errors):
         self.archivos.update(nuevos_archivos)
         for key, grupo_nuevo in nuevos_grupos.items():
-            if key in self.grupos: self.grupos[key].fotos.extend(grupo_nuevo.fotos)
-            else: self.grupos[key] = grupo_nuevo
+            if key in self.grupos:
+                self.grupos[key].fotos.extend(grupo_nuevo.fotos)
+                _apply_description_recs(self.grupos[key])
+            else:
+                self.grupos[key] = grupo_nuevo
         self.actualizar_lista_grupos()
         self.set_ui_busy(False)
         if errors:

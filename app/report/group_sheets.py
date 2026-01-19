@@ -221,8 +221,17 @@ def add_group_sheets(wb: Workbook, grupos: Dict[str, Grupo], archivos: Dict[str,
         current_row += 1
 
         # --- Recommendations Content ---
-        recs = getattr(grupo, "recomendaciones", None) or []
-        rec_text = "\n".join(f"• {r}" for r in recs) if recs else "—"
+        foto_recs = []
+        foto_rec_texts = set()
+        for i, foto in enumerate(grupo.fotos, start=1):
+            if foto.recommendation:
+                foto_recs.append(f"{foto.recommendation} [Foto {i}]")
+                foto_rec_texts.add(foto.recommendation)
+
+        recs_from_group = getattr(grupo, "recomendaciones", None) or []
+        recs_hist = [r for r in recs_from_group if r and r not in foto_rec_texts]
+        recs = foto_recs + recs_hist
+        rec_text = "\n".join(f"- {r}" for r in recs) if recs else ""
         chars_per_line_recs = 90
         rec_lines_visual = estimate_visual_lines(rec_text, chars_per_line_recs)
         needed_rows_recs = max(4, rec_lines_visual)
@@ -246,3 +255,6 @@ def add_group_sheets(wb: Workbook, grupos: Dict[str, Grupo], archivos: Dict[str,
         if progress_callback:
             progress_percentage = int(((idx + 1) / total_grupos) * 100)
             progress_callback.emit(progress_percentage)
+
+
+

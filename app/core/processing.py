@@ -127,12 +127,10 @@ def _parse_descriptions(txt_descriptions: str, group_lookup: Dict[str, str], arc
             specific_detail = desc_parts[1].strip() if len(desc_parts) > 1 else ''
             current_block["description"] = specific_detail
             current_block["numbering_code"] = numbering_code
-            # Check next line for recommendation
-            if i + 1 < len(lines):
-                next_line = lines[i + 1].strip()
-                if next_line.lower().startswith("recommendation:"):
-                    current_block["recommendation"] = next_line.split(":", 1)[1].strip()
-                    i += 1  # Skip the recommendation line
+        elif line.lower().startswith("recommendation:") and current_block:
+            rec_text = line.split(":", 1)[1].strip()
+            if rec_text and not current_block.get("recommendation"):
+                current_block["recommendation"] = rec_text
         i += 1
 
     # Process last block

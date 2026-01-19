@@ -217,10 +217,19 @@ def _compose_group_texts(grupo: Grupo) -> Tuple[str, str]:
         entradas.append((detail_after_plus, f"{foto.carpeta} [Foto {i}]"))
     oraciones = agrupa_y_redacta(entradas, umbral_similitud=0.8)
     detalles_text = "\n".join(f"{i}. {s}" for i, s in enumerate(oraciones, start=1))
-    recs = getattr(grupo, 'recomendaciones', None) or []
-    recomendaciones_text = "\n".join(f"• {r}" for r in recs) if recs else ""
-    return detalles_text, recomendaciones_text
 
+    foto_recs = []
+    foto_rec_texts = set()
+    for i, foto in enumerate(grupo.fotos, start=1):
+        if foto.recommendation:
+            foto_recs.append(f"{foto.recommendation} [Foto {i}]")
+            foto_rec_texts.add(foto.recommendation)
+
+    recs_from_group = getattr(grupo, 'recomendaciones', None) or []
+    recs_hist = [r for r in recs_from_group if r and r not in foto_rec_texts]
+    recs = foto_recs + recs_hist
+    recomendaciones_text = "\n".join(f"- {r}" for r in recs) if recs else ""
+    return detalles_text, recomendaciones_text
 
 def _apply_group_placeholders(ws, grupo: Grupo):
     """Replace group-scoped placeholders at any location in the sheet."""
@@ -341,4 +350,8 @@ def export_groups_to_xlsx_with_template(
     add_control_documents_sheets(wb, control_documents, conclusiones)
 
     wb.save(output_xlsx_path)
+
+
+
+
 
